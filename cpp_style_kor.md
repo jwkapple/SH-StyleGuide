@@ -8,7 +8,7 @@
 
 ### In. Prerequisites
 
-이 코딩 스타일은 다음 라이브러리 혹은 관리 프레임워크를 쓴다고 가정한 상태에서 적용될 수 있다.
+이 코딩 스타일은 다음 라이브러리 혹은 관리 프레임워크를 쓸 때 완전히 적용된다.
 
 * [**Doxygen**](http://www.stack.nl/~dimitri/doxygen/) : Generate documentation from source code, Doxygen is the de facto standard tool for generating documentation from annotated C++ sources.
 * [**Git**](https://git-scm.com/)
@@ -895,11 +895,61 @@ void Foo(const std::string& in, string* out);
 
 ### T. `noexcept`
 
-* 
+> noexcept — what for?
+> https://akrzemi1.wordpress.com/2014/04/24/noexcept-what-for/
+>
+> Should I use noexcept for getters always?
+> https://stackoverflow.com/questions/21330807/should-i-use-noexcept-for-getters-always
+
+* 이 가이드에서는 예외를 사용하지 않기 때문에 **거의 `noexcept` 을 사용하는 것을 권장한다.** 
+  * 예외를 사용한다면, 간단하고 예외를 던지지 않는 것을 보장할 때만 `noexcept` 을 사용한다.
+  * **`throw()` 을 사용하지 않는다. (deprecated since C++17~)**
+* `move` 시맨틱을 활용할 경우에는 **무조건 `noexcept` 을 보장해야 한다. (후술)**
+  * 왜냐면, `std::vector<T>::push_back()` 와 같은 경우에는 **예외 안정성을 보장해야 하는데 이동 함수가 예외를 보장하지 못할 경우에는 복사가 되기 ** 때문이다.
+  * 객체 타입이 예외 안전성을 보장하는지 볼려면 `std::move_if_noexcept` 을 사용해서 볼 수 있다.
+* **Special function** 에서, **암시적 기본 생성자, 복사 생성자, 대입 복사 연산자, 이동 생성자, 대입 이동 연산자, 소멸자는 기본 `noexcept` 이다**.
+
+일반 예외가 던져질 때는 *Stack unwinding* 을 통해 스택을 훑어나가는 데, `noexcept` 을 사용해서 std::terminate() 을 호출하는 대신 *unwinding* 코드를 생성하지 않도록 할 수도 있다.
+
+`noexcept(expression)` 는 표현식을 컴파일 타임 체크를 해서, 해당 함수의 바디가 결과적으로 예외를 던지지 않는다면 성능 향상의 효과를 기대할 수 있다. 만약 표현식이 예외를 던진다면, 해당 함수는 *잠재적인 예외 함수*가 된다. 
+
+또한 *Move 생성자*를 `noexcept` 로 설정 시, `std::vector<T>::resize()` 에서 동적 배열을 리사이징 할 때 값을 복사하지 않고 그대로 이동시키게 할 수 있는 잠재적인 성능 향상을 기대해볼 수 있다.
+
+* *no-fail* 과 *no-throw* 는 엄연히 다른 개념이다.
+  * **`noexcept` 는 함수의 행동이 절대로 실패하지 않음을 보장할 때만 써야한다.**
+
+#### Example
+
+``` c++
+// From https://akrzemi1.wordpress.com/2014/04/24/noexcept-what-for/
+int Tool::operator=(Tool&& rhs)
+{
+  if (ResourceHandle tmp = getSentinelResource()) {
+    dispose(this->resourceHandle);
+    this->resourceHandle = rhs.resourceHandle;
+    rhs.resourceHandle = tmp;
+    return EXIT_SUCCESS;
+  }
+  else {
+    return EXIT_FAILURE;
+  }
+}
+```
+
+위 코드에서는 어느 코드도 예외를 던지지 않을 뿐더러, 내부에 호출되는 함수 역시 예외를 던지지 않는다. 하지만 이 코드가 `noexcept` 로 선언되어야 하냐면 그것은 또 아니다. 왜냐면 **이동 연산이 실패**할 수도 있기 때문이다. `push_back()` 의 함수를 사용할 때 해당 이동 연산이 `noexcept` 로 처리되어 복사 대신 이동을 할 때, 조건 분기에서 실패를 하게 된다면 미정의 행동을 일으킬 가능성이 높다. 
+
+#### operator `noexcept`
+
+``` c++
+noexcept(expression);
+```
+
+* **noexcept 연산자**는 컴파일 타임에 해당 표현식이 예외를 던지지 않는지 확인해서 true/false 을 반환한다.
+* *noexcept specifier* 와는 엄연히 다르다. *specifier* 는 런타임에 예외 판정을 한다.
 
 ### T. RTTI
 
-- **`typeid` `dynamic_cast` 등의 RTTI 의 사용을 피한다.**
+- **`typeid` `dynamic_cast` 등의 RTTI 의 사용을 금지한다.**
 - **유닛 테스트에서는 자유롭게 사용해도 된다.**
 
 > 실행시간(run-time)에 객체의 타입을 자주 질의하는 것은 설계에 문제가 있다는 뜻이다. 실행시간에 객체의 타입을 알아야 하는 것은 클래스 계층 설계가 가진 결함의 징후인 경우가 종종 있다.
@@ -910,7 +960,7 @@ void Foo(const std::string& in, string* out);
 
 ### T. Use `static_cast<>()`
 
-* **`static_cast<>()` 와 같은 정적 형 변환을 사용한다.**
+* **`static_cast<>()` 와 같은 정적 형 변환만을 사용한다.**
 * **C 언어 형 변환, RTTI 형 변환 및 `const_cast<>()` 역시 사용하지 않는다.**
 * **포인터 타입을 정수 및 다른 포인터 타입과 안전하지 않게 서로 형 변환하고자 할 때는 `reinterpret_cast<>()` 을 사용한다. 이 경우 의도를 가지고 주석 등으로 설명하는 것을 선호하라.**
 

@@ -10,12 +10,13 @@
 
 이 코딩 스타일은 다음 라이브러리 혹은 관리 프레임워크를 쓸 때 완전히 적용된다.
 
-* [**Doxygen**](http://www.stack.nl/~dimitri/doxygen/) : Generate documentation from source code, Doxygen is the de facto standard tool for generating documentation from annotated C++ sources.
-* [**Git**](https://git-scm.com/)
+* [**Doxygen**](http://www.stack.nl/~dimitri/doxygen/) : Generate documentation from source code, **Doxygen** is the de facto standard tool for generating documentation from annotated C++ sources.
+* [**Git**](https://git-scm.com/) : **Git** is a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency. 
+* [**fmt**](http://fmtlib.net/latest/index.html) : **fmt** (formerly cppformat) is an open-source formatting library. It can be used as a safe alternative to printf or as a fast alternative to C++ IOStreams.
 
 ### In. Log
 
-* 2018-05-09 Under construction.
+* 2018-05-21 Under construction.
 
 ### In. Influenced Style guides
 
@@ -76,6 +77,7 @@
 
 * **영어로, 간결하게, 코드의 전반적인 행동을 써라.**
 * **디버깅용으로 상당량의 코드를 주석 처리 할 경우에는, `#if 0` 와 `#endif` 을 써서 코드를 무효화한다.**
+  * 어디까지나 주석은 코드에 대한 설명을 위해서만 존재한다.
 
 > **Comments are comments.  They describe the code.**
 >
@@ -119,9 +121,45 @@ if (it->second) {
 
 ### C. Comment Formatting
 
-* `//` 혹은 `/* */` 신택스 중 둘 중 하나를 써도 상관은 없으나, 가급적이면 `//` (C++ style) 을 쓴다.
-  * **주석을 작성할 때는 `//` 을 쓴다.**
-  * *doxygen* 의 문서를 작성할 경우, `///` 을 쓴다.
+* `//` 혹은 `/* */` 신택스 중 둘 중 하나를 써도 상관은 없으나, **가급적이면 `//` 을 쓴다.**
+  * **함수 바디 안에서 주석을 작성할 때는 `//` 을 쓴다. 이 경우 양 끝에 주석을 한 줄씩 추가할 필요는 없다.**
+  * *doxygen* 의 문서를 작성할 경우, `///` 을 쓴다. 이 때 양 끝에 한 줄씩 주석을 더 쓴다.
+  * 네임스페이스의 끝, 헤더 파일 코멘트의 경우 `///` 을 쓴다.
+
+**Good**
+
+``` c++
+///
+/// @brief 
+/// Let each key value where key status is KeyInputStatus::RELEASED 
+/// falling down into dead_zone and change status into KeyInputStatus::NEUTRAL 
+/// along with neutral_gravity.
+///
+/// This methods gets delta time from Application time data, 
+/// multiply it with gravity and fall it down to 0 (neutral value).
+///
+/// @param[in] key_info Key information to apply.
+///
+void ProceedGravity(opgs16::manager::_internal::BindingKeyInfo& key_info)
+```
+
+**Bad**
+
+``` c++
+/// @brief 
+/// Let each key value where key status is KeyInputStatus::RELEASED 
+/// falling down into dead_zone and change status into KeyInputStatus::NEUTRAL 
+/// along with neutral_gravity.
+
+or
+
+/** 
+ * @brief 
+ * Let each key value where key status is KeyInputStatus::RELEASED 
+ * falling down into dead_zone and change status into KeyInputStatus::NEUTRAL 
+ * along with neutral_gravity.
+ */
+```
 
 ###### 예외
 
@@ -156,21 +194,28 @@ if (it->second) {
 **Good**
 
 ``` c++
-/// ---*---*---*---*---*---*---*---*---*---*---*---*---*---*---*
-/// \license BSD 2-Clause License
-/// 
+///
+/// @license BSD 2-Clause License
+///
 /// Copyright (c) 2018, Jongmin Yun(Neu.), All rights reserved.
 /// If you want to read full statements, read LICENSE file.
-/// ---*---*---*---*---*---*---*---*---*---*---*---*---*---*---*
-/// \file Source/Module/main.cc
-/// \brief Entry file that has main funciton.
 ///
-/// \log
-/// 2018-05-09 Create file and make main function.
-/// ---*---*---*---*---*---*---*---*---*---*---*---*---*---*---*
+/// @file Manager/input.cc
+///
+/// @brief
+/// blah blah something...
+///
+/// @author Jongmin Yun
+///
+/// @log
+/// 2018-03-03 Refactoring.
+/// 2018-05-20 Get rid of singleton pattern and rebuild it to namespace.
+///
+/// @todo Replace own input data style to json.
+///
 ```
 
-* **만약 `.h` 파일이 여러가지 추상화를 가지고 있으면, 해당 파일의 전반적인 내용에 대해서만 1, 2 줄로 기술한다.**
+* **만약 `.h` 파일이 여러가지 추상화를 가지고 있으면, 해당 파일의 전반적인 내용에 대해서 1, 2 줄로 쓴다.**
   * 구체적인 문서는 해당 추상화 클래스 및 기능의 앞 부분에서 코멘트를 쓴다.
 
 ### C. Implementation Comments
@@ -189,7 +234,7 @@ for (int i = 0; i < result->size(); i++) {
 }
 ```
 
-* **명확하지 않은 행동을 나타내는 코드 줄에는 끝에 주석을 달아서 설명을 하는 것을 지향한다.**
+* **명확하지 않은 행동을 나타내는 코드 줄에는 위에 주석을 달아서 설명을 하는 것을 추천한다.**
 
 **Good**
 
@@ -202,7 +247,6 @@ if (mmap_budget >= data_size_ && !MmapData(mmap_chunk_bytes, mlock))
 
 * **만약 여러 개의 주석 줄을 끝에 달아야 한다면, 주석 정렬을 사용할 수 있다.**
 * **명확한 구문에는 일일히 주석을 달지 않는다.**
-  * Instead, provide higher level comments that describe why the code does what it does, or make the code self describing.
 
 ~~**Bad**~~
 
@@ -216,7 +260,7 @@ if (iter != v.end()) {
 
 ### C. TODO style
 
-* **`doxygen` 으로 TODO 을 쓰되, 소괄호 `()` 안에 issue 번호를 기입한다.**
+* **`doxygen` 으로 todo 을 쓰되, 소괄호 `()` 안에 issue 번호를 기입한다.**
 
 
 
@@ -320,20 +364,21 @@ MUST_USE_RESULT __CDECL bool IsOk();
 **Good**
 
 ``` c++
-bool ret_val = DoSomething(argument1, argument2, argument3);
-bool ret_val = DoSomething(argument1, argument2,
-                           argument3);
+EFlag ret_val = DoSomething(argument1, argument2, argument3);
+EFlag ret_val = DoSomething(argument1, argument2,
+                            argument3);
 
-bool ret_val = DoSomething(argument1,
-                           argument2,
-                           argument3,
-                           argument4);
+EFlag ret_val = DoSomething(argument1,
+                            argument2,
+                            argument3,
+                            argument4);
 ```
 
 ``` c++
 if (...) {
   if (...) {
-  	DoSomething(  // 4 indents
+    // 4 indents
+  	DoSomething(
         argument1, argument2,
         argument3, argument4);
   }
@@ -344,7 +389,7 @@ if (...) {
 
 ``` c++
 int my_heuristic = scores[x] * y + bases[x];
-bool result = DoSomething(my_heuristic, x, y, z);
+EDoFlag result = DoSomething(my_heuristic, x, y, z);
 ```
 
 ### F. 중괄호 초기화 리스트 (Braced Initializer List)
@@ -372,7 +417,11 @@ if (condition) {
 
 ``` c++
 if (x == EEnum::Foo) return new Foo();
-else return new Nop();
+
+if (x == EEnum::Foo) 
+  return new Foo();
+else 
+  return new Nop();
 
 if (x == EEnum::Foo) {
   return new Foo();
@@ -385,8 +434,9 @@ if (x == EEnum::Foo) {
 ~~**Bad**~~
 
 ``` c++
+if (x == EEnum::Foo) return new Foo(); 
+else return new Nop();
 if (x == EEnum::Foo) return new Foo(); else return new Nop();
-
 if (x == EEnum::Foo) return new Foo();
 else {
   ...
@@ -394,7 +444,7 @@ else {
 }
 ```
 
-* **`if` 구문에서 중괄호를 쓸 때는 항상 모든 경우에 같이 중괄호를 쓰거나 말아야 한다.**
+* **`if` 구문에서 중괄호를 쓸 때는 모든 경우에 항상 같이 중괄호를 쓰거나 말아야 한다.**
 
 **Good**
 
@@ -413,6 +463,21 @@ if (complex_condition) {
   DoSomething();
 } else
   DoOtherThing();
+```
+
+* **에러 출력 혹은 즉각 return 구문이 있는 절을 if 로 분기를 나눠서 쓰고자 할 때는, `then` 구문에 에러 혹은 immediate return 을 쓸 수 있도록 한다.**
+
+``` c++
+float GetKeyValue(const std::string& key) {
+  NEU_ASSERT(m_initiated == EInitiated::Initiated, debug::err_input_not_initiated);
+
+  if (IsKeyExist(key) == EKeyExist::NotExist) {
+    PUSH_LOG_ERRO("fuck");
+		return 0.f;
+	}
+
+  return m_key_inputs[key].value;
+}
 ```
 
 ### F. 루프문 (Loops)
@@ -505,7 +570,7 @@ namespace nm_c {
 } // ::nm_a
 ```
 
-* **C++17 에서 추가된 중첩 네임스페이스 기능은 파일에서 한 네임스페이스의 내용만 구현할 때만 사용한다.**
+* **C++17 에서 추가된 중첩 네임스페이스 기능은 파일 당 하나의 네임스페이스의 내용을 구현할 때만 사용한다.**
 
 ``` c++
 namespace nm_a::nm_b::nm_c {
@@ -527,7 +592,7 @@ namespace nm_a::nm_b::nm_c {
 *  **#ifndef, #define, #endif 의 Define guard 을 쓴다.**
 
 *Define Guard* 을 설정할 때, `#ifndef` `#define` `#endif` 을 사용해서 설정한다.
-*Guard* 의 이름은 해당 프로젝트의 이름 + 해당 프로젝트로부터의 경로 이름이 된다.
+*Guard* 의 이름은 해당 프로젝트의 이름 + 해당 프로젝트로부터의 경로 이름이 된다. 다만 `Include` 혹은 `Source` 와 같은 대분류 디렉터리는 쓰지 않는다.
 
 **Good**
 
@@ -536,7 +601,7 @@ namespace nm_a::nm_b::nm_c {
 #ifndef PROJECT_NAME_INCLUDE_MODULE_OWNER_H
 #define PROJECT_NAME_INCLUDE_MODULE_OWNER_H
 
-#endif // PROJECT_NAME_INCLUDE_MODULE_OWNER_H
+#endif // PROJECT_NAME_MODULE_OWNER_H
 ```
 
 ~~**Bad**~~
@@ -555,8 +620,7 @@ namespace nm_a::nm_b::nm_c {
 ### H. Header Include Order
 
 *  **All of a project's header files should be listed as descendants of the project's source directory without use of UNIX directory shortcuts . (the current directory) or .. (the parent directory).**
-
-파일 디렉터리 구조가 변경되었을 때도 일일히 헤더 파일의 인클루드 경로를 변경하지 않아도 된다.
+   *  파일 디렉터리 구조가 변경되었을 때도 일일히 헤더 파일의 인클루드 경로를 변경하지 않아도 된다.
 
 ##### A. 예시
 
@@ -610,8 +674,8 @@ $(ProjectDir)Include
 **Good**
 
 ``` c++
-// Include guard...
-#include "base/logging.h"
+// Include guard
+#include <base/logging.h>
 
 #include <cstdio>
 #include <ctime>
@@ -620,13 +684,14 @@ $(ProjectDir)Include
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
-#include "base/module/owner.h"
+// ::base::module::owner
+#include <base/module/owner.h>
 ```
 
 ~~**Bad**~~
 
 ``` c++
-// Include guard...
+// Include guard
 #include "base/logging.h"
 
 #include <chrono>
@@ -645,6 +710,9 @@ $(ProjectDir)Include
 
 * **위의 인클루드 순서를 유지하면서, 알파벳 이름 순으로 인클루드 하라.**
 * **You should include all the headers that define the symbols you rely upon, except in the unusual case of forward declaration. If you rely on symbols from bar.h, don't count on the fact that you included foo.h which (currently) includes bar.h: include bar.h yourself, unless foo.h explicitly demonstrates its intent to provide you the symbols of bar.h**
+* **하나의 해석 단위의 최종 파일은 한 개의 `.cc` 로 끝나야 하며, 해석 단위 중간에 `.cc` 파일이 포함되서는 안된다.**
+  * 즉, `#include` 를 할 때 `.cc` 파일의 인클루드는 하지 않는다.
+* **인클루드는 오직 `.h` 파일 또는 `헤더 파일` 만 한다.**
 
 ###### 예외
 
@@ -700,6 +768,20 @@ logs.h
 ```
 
 * **파일 안에 하나의 클래스 추상화만 있을 때는 해당 클래스의 이름을 따와서 파일 이름을 작성하는 것을 추천한다.**
+* **만약, 해당 파일이 있는 폴더의 이름으로 파일의 쓰임새를 확실히 알 수 있으면, **
+  **간결하게 작성한다.**
+  * 이 경우 파일의 이름을 구체적으로 쓰면 읽기 매우 번거롭다.
+
+``` c++
+// Include
+// L Manager
+//   L Internal
+//     L input.h
+//     L font.h
+//   L input.h
+//   L font.h
+//   L object.h
+```
 
 ### N. Type Names
 
@@ -858,6 +940,38 @@ enum class EUrlTableErrorsNotProper {
 
 ## Other C++ Features
 
+### T. 고정 사이즈 정수형 타입 (`cstdint`)
+
+> 64-bit data models
+> https://en.wikipedia.org/wiki/64-bit_computing
+>
+> | Data model      | short (integer) | int  | long (integer) | long long | pointers,  size_t | Sample operating systems                                     |
+> | --------------- | --------------- | ---- | -------------- | --------- | ----------------- | ------------------------------------------------------------ |
+> | LLP64,  IL32P64 | 16              | 32   | 32             | 64        | 64                | [Microsoft Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) (x86-64 and IA-64) using [Visual C++](https://en.wikipedia.org/wiki/Visual_C%2B%2B); and [MinGW](https://en.wikipedia.org/wiki/MinGW) |
+> | LP64,  I32LP64  | 16              | 32   | 64             | 64        | 64                | Most [Unix](https://en.wikipedia.org/wiki/Unix) and [Unix-like](https://en.wikipedia.org/wiki/Unix-like) systems, e.g., [Solaris](https://en.wikipedia.org/wiki/Solaris_(operating_system)), [Linux](https://en.wikipedia.org/wiki/Linux), [BSD](https://en.wikipedia.org/wiki/BSD), [macOS](https://en.wikipedia.org/wiki/MacOS). [Windows](https://en.wikipedia.org/wiki/Windows) when using [Cygwin](https://en.wikipedia.org/wiki/Cygwin); [z/OS](https://en.wikipedia.org/wiki/Z/OS) |
+> | ILP64           | 16              | 64   | 64             | 64        | 64                | [HAL Computer Systems](https://en.wikipedia.org/wiki/HAL_Computer_Systems) port of Solaris to the [SPARC64](https://en.wikipedia.org/wiki/HAL_SPARC64) |
+> | SILP64          | 64              | 64   | 64             | 64        | 64                | *Classic* [UNICOS](https://en.wikipedia.org/wiki/UNICOS)[[41\]](https://en.wikipedia.org/wiki/64-bit_computing#cite_note-SILP64-41) (versus UNICOS/mp, etc.) |
+>
+> Fixed width integer types (since C++11)
+> http://en.cppreference.com/w/cpp/types/integer
+>
+> Should I use long long or int64_t for portable code?
+> https://stackoverflow.com/questions/12468281/should-i-use-long-long-or-int64-t-for-portable-code
+>
+> Does a `long` ban make sense?
+> https://softwareengineering.stackexchange.com/questions/317670/does-a-long-ban-make-sense
+
+* C++ 표준에서는 short, int, long 등과 같은 자료형의 크기를 명시적으로 정의하지 않고 있다. 하지만 **int 는 대개 32bit로 구현되며, long long 은 64bit 로 구현된다.**
+  * 따라서, 왠만한 경우에서는 `bool` `int` 만을 주 타입으로 쓴다. 
+  * **하지만, `stdint` 와 같은 파일을 사용해 고정 사이즈 변수를 쓸 수 있고, 어느 플랫폼에서도 고정 비트의 변수 값을 사용하고 싶을 때는 `int32_t` `uint32_t` `int64_t` 등을 쓰도록 해야한다.** 
+    다만 플랫폼 및 컴파일러에 따라 제공하는 최대 변수 타입이 달라질 수도 있다.
+  * `for` `while` 에서 탐색을 위한 임시 변수를 사용할 때는 고정형 타입을 쓰지 않는다.
+* `long` 타입의 경우에는 x64 모델 시스템에서의 윈도우에서의 사이즈, 그 외 유닉스 및 리눅스 계열의 사이즈 값이 다르기 때문에 사용을 금한다.
+
+### T. `size_t`
+
+* **인덱스 값 저장 혹은 인덱스 참조를 위한 일부 계산식을 제외하고는 `size_t` 를 일반 변수형과 같이 섞어 사용하지 않는다.**
+
 ### T. 레퍼런스 인자
 
 * **레퍼런스로 전달되는 모든 인자는 `const` 로 수식되어야 한다.**
@@ -869,7 +983,11 @@ void Foo(const std::string& in, string* out);
 
 ### T. Rvalue References
 
+> Rvalue references and move semantics
+> https://isocpp.org/wiki/faq/cpp11-language#rval
 
+* **Forwarding Reference (Perfect Forwarding), 이동 연산자 및 이동 생성자를 정의할 때에만 사용하라**
+  * Perfect forwarding 은 std::forward<>() 혹은 std::move() 을 이용해서 시도해볼 수 있다.
 
 ### T. Friends
 
@@ -887,11 +1005,18 @@ void Foo(const std::string& in, string* out);
 
 > 더 일반적으로, 예외는 코드를 보며 프로그램의 흐름을 파악하기 어렵게 하고 함수들이 어디서 제대로 리턴할 지 기대하기 어렵게 만들며 이것은 유지 보수와 디버깅을 어렵게 한다. 이러한 불편은 어디서 어떻게 예외를 사용할지 규칙을 정하는 것으로 줄일 수 있지만 개발자가 그것을 알고 이해해야 한다는 비용도 크다. 
 >
-> 예외를 사용하는 것은 만들어진 각 바이너리(binary)에 데이터를 추가하고 (아마도 작겠지만) 컴파일 시간과 주소 공간의 부담을 증가시킨다. 
+> 예외를 사용하는 것은 만들어진 각 바이너리(binary)에 데이터를 추가하고 컴파일 시간과 주소 공간의 부담을 증가시킨다. 
 >
 > 더 일반적으로, 예외는 코드를 보며 프로그램의 흐름을 파악하기 어렵게 하고 함수들이 어디서 제대로 리턴할 지 기대하기 어렵게 만들며 이것은 유지 보수와 디버깅을 어렵게 한다. 이러한 불편은 어디서 어떻게 예외를 사용할지 규칙을 정하는 것으로 줄일 수 있지만 개발자가 그것을 알고 이해해야 한다는 비용도 크다. 
 >
 > ~  Google C++ Style guide (한글) [link](http://jongwook.kim/google-styleguide/trunk/cppguide.xml)
+
+* **따라서, STL 컨테이너 대다수 `std::vector` `std::list` `std::map` 등 은 사용할 수 없다.**
+
+  * exception 을 사용하지 않는 STL 방언을 사용한다. 
+  * EASTL 을 사용하는 것을 추천한다.
+
+  *예외*는 현대 C++ 의 기본 철칙인 
 
 ### T. `noexcept`
 
@@ -963,4 +1088,269 @@ noexcept(expression);
 * **`static_cast<>()` 와 같은 정적 형 변환만을 사용한다.**
 * **C 언어 형 변환, RTTI 형 변환 및 `const_cast<>()` 역시 사용하지 않는다.**
 * **포인터 타입을 정수 및 다른 포인터 타입과 안전하지 않게 서로 형 변환하고자 할 때는 `reinterpret_cast<>()` 을 사용한다. 이 경우 의도를 가지고 주석 등으로 설명하는 것을 선호하라.**
+
+### T. Macro preprocessor
+
+* **합당한 이유가 있을 때만 매크로를 써라.**
+
+C 의 유산인 매크로는 해석 범위에 대해 전역 범위를 가진다. 매크로를 사용 할 때 에러를 파악하기 힘들며 매크로 지점에서 에러가 발생했을 때는 매크로가 어떤 행동을 하는지 알아야 하는 수고가 있다. 또한 리팩터링 및 정적 분석 툴을 사용하는데 있어서도 어려움이 동반된다. 
+
+매크로를 정 쓰고자 한다면, 최신 C++ 의 기능을 사용해서 기능을 구현할 수 있는지 확인하고 없을 때 매크로를 쓸 수 있다.
+
+* **매크로를 사용해서 `inline` 화를 꾀하고자 할 때는 `inline` 함수를 사용한다.**
+* **상수를 이용하고 싶을 때는 `const` 혹은 `constexpr` 변수를 사용한다.**
+* **긴 이름을 줄이려고 한다면, *참조*를 사용한다.**
+* **그 외 등등...**
+
+또한 다음 규칙을 준수한다.
+
+* **프로젝트 전체에 범용으로 쓰지 않을 예정이면 `.h` 헤더 파일에 매크로를 선언하지 않는다.**
+  * 프로젝트 전체에 쓸 때는 `.h` 파일에 매크로를 작성할 수 있다.
+* 일부 소스 코드에서만 사용하는 매크로를 쓸 경우, 
+  매크로를 사용하기 직전에 `#define` 을 쓰고, 쓰고 난 직후 `#undef` 을 써서 매크로를 해제시킨다.
+* 가급적이면 `##` concatenation 전처리 지시자를 사용하지 않는다.
+* 부득이하게 헤더에서 매크로를 선언해야 할 경우, *prefix* 로 프로젝트 고유 식별자를 사용한다.
+
+``` c++
+/// Helper/assert.h
+
+#ifndef NDEBUG
+
+#define NEU_ASSERT(__MAExpr__, __MAMessage__) \
+  ::opgs16::debug::__EnhancedAssert(#__MAExpr__, __MAExpr__, __FILE__, __LINE__, __MAMessage__)
+
+#define NEU_NOT_IMPLEMENTED_ASSERT() \
+  ::opgs16::debug::__NotImplementedAssert(__FILE__, __LINE__)
+
+#else
+
+#define NEU_ASSERT(__MAExpr__, __MAMessage__) (void(0));
+
+#define NEU_NOT_IMPLEMENTED_ASSERT() (void(0));
+
+#endif
+```
+
+### T. `sizeof`
+
+* **`sizeof(Type)` 대신에 `sizeof(variable_name)` 을 사용한다.**
+
+**Good**
+
+``` c++
+Struct data;
+memset(&data, 0, sizeof(data));
+```
+
+~~**Bad**~~
+
+``` c++
+memset(&data, 0, sizeof(Struct));
+```
+
+* **만약 특정 변수에 종속되지 않은 sizeof 을 사용할 때는 `sizeof(Type)` 을 써도 된다.**
+
+**Example**
+
+``` c++
+if (raw_size < sizeof(int)) {
+  LOG(ERROR) << "compressed record not big enough for count: " << raw_size;
+  return false;
+}
+```
+
+### T. Template Metaprogramming
+
+> Template metaprogramming
+> https://google.github.io/styleguide/cppguide.html#Template_metaprogramming
+
+* **너무 복잡한 템플릿 메타 프로그래밍은 자제한다.**
+
+### T. Strong boolean enum
+
+> Boolean enums: improved clarity or just overkill? [closed]
+> https://codereview.stackexchange.com/questions/11300/boolean-enums-improved-clarity-or-just-overkill
+>
+> ...the enum is a very nice solution here. And in a way I disagree with Johannes, even for single-use the enum improves readability and discoverability of the API, and writing it is a negligible effort...
+
+* **어떤 행동의 발생 여부를 저장하는 변수, 또는 함수의 반환형은 `bool` 이 아닌, bool 을 바탕 타입으로 가지는 `enum class` 타입이어야 한다.**
+  * 가독성을 높이고, 유지 관리를 보다 더 수월하게 할 수 있다.
+  * `enum class` 는 기존의 `enum` 과는 다르게 범위를 가지며 암시적으로 바탕 타입으로 변환이 될 수 없다.
+  * `bool` 만으로 모든 플래그를 관리하려면 생각 외로 머리를 많이 굴려야 한다.
+
+boolean 열거형 플래그는 다음처럼 작성한다.
+
+```c++
+///
+/// @enum EInitiated
+/// @brief
+/// This enum class is for checking and preventing duplicated 
+/// ::opgs16::manager::(namespace)::Initiate() call from somewhere.
+///
+enum class EInitiated : bool {
+  NotInitiated = false,
+  Initiated = true
+};
+```
+
+그리고 다음처럼 쓸 수 있다.
+
+```c++
+void Initiate() {
+  // Integrity check.
+  NEU_ASSERT(m_initiated == EInitiated::NotInitiated, debug::err_setting_duplicated_init);
+  m_initiated = EInitiated::Initiated;
+  ...
+}
+```
+
+* **그 외에 `bool` 타입은 어떤 사용자 정의 타입의 연산이 매우 명확할 때에만 인자 값으로 사용할 수 있다.**
+  * 어떤 함수의 인자가 `isSensitive` `is...` 와 같은 이름으로 `bool` 값을 받는다고 해도 사용자 측에서는 해당 함수의 인자 값이 무엇을 의미하는지 API 문서를 찾아보지 않고서는 전혀 알 수 없다.
+
+```c++
+myObject.Enable(true);
+```
+
+* `bool` 와 바탕 타입이 `bool` 인 `enum class` 사이의 성능 차이는 없으며, `-O2` 에서 출력되는 어셈블리 역시 동일하다.
+  * -std=c++0x 에서, ARM gcc 6.3.0, clang 4.0.0, x86-64 gcc 4.8.3 에서 검증 완료
+  * https://godbolt.org/g/eAAiBh
+
+```assembly
+OnBool():
+        movb    $1, (anonymous namespace)::is_on(%rip)
+        ret
+OnEBool():
+        movb    $1, (anonymous namespace)::is_eon(%rip)
+        ret
+.LC0:
+        .string "plain bool is off"
+.LC1:
+        .string "plain bool is on"
+CheckBool():
+        cmpb    $0, (anonymous namespace)::is_on(%rip)
+        je      .L6
+        movl    $.LC1, %edi
+        jmp     puts
+.L6:
+        movl    $.LC0, %edi
+        jmp     puts
+.LC2:
+        .string "plain enum bool is off"
+.LC3:
+        .string "plain enum bool is on"
+CheckEBool():
+        cmpb    $0, (anonymous namespace)::is_eon(%rip)
+        je      .L9
+        movl    $.LC3, %edi
+        jmp     puts
+```
+
+### T. Assertion
+
+* **적극 사용한다. 하지만 단언문 (assert) 은 릴리즈 모드에서는 무효화되기 때문에 검증 표현식에 프로그램의 행동을 바꾸는 구문은 쓰지 말아야 한다.**
+
+**Good**
+
+``` c++
+assert(1 == 1)
+```
+
+~~**Bad**~~
+
+``` c++
+assert(value == i++)
+```
+
+* **기본으로 제공되고 있는 assert(expression) 은 메시지를 출력할 수 없기 때문에 메시지 출력이 가능한 이식성 있는 assert 을 만들어서 쓴다.**
+
+## Et cetera
+
+### E. 64-bit Portability
+
+* **해당 프로젝트의 코드는 반드시 64-bit 와 32-bit 호환성을 만족시켜야 한다.**
+  * 출력, 비교 및 구조체 정렬에 대해서 조심히 다뤄야 한다.
+
+### E. Boost
+
+### E. EASTL
+
+### E. Do not use singleton
+
+* **싱글턴은 사용하지도 않고, 쳐다보지도 않는다.**
+  * C++ 는 C# 이 아니다!
+  * **싱글턴은 게으른 초기화 (lazy initialization) 을 사용하고 있으며 제어할 수 없다.**
+  * C++11 이후에는 지역 범위 정적 객체에 대한 참조 반환이 스레드에 안전하게 변경이 되었지만, **싱글턴 클래스 자체의 스레드 안전 여부와는 별개의 사항이다.** C++11 이전에는 [double-checked locking](https://en.wikipedia.org/wiki/Double-checked_locking) 과 같은 특수한 패턴을 사용했지만 매우 번거롭고 뮤텍스를 사용하기 때문에 성능을 떨어뜨린다.
+
+~~**Bad**~~
+
+``` c++
+// Fxxking do not use singleton!!!!
+class MFontManager final {
+public:
+	/*! Return single static instance. This must be called in initiation time once. */
+	static MFontManager& Instance() {
+		static MFontManager instance{};
+		return instance;
+	}
+}
+```
+
+* **관리 객체에 대해서는 정적 클래스를 사용한 싱글턴 대신, 네임스페이스를 사용한다.**
+  * 네임스페이스로 바깥에 보일 함수만을 만들고, 나머지는 `.cc` 파일에 구현한다.
+  * 관리할 데이터는 `.cc` 파일에서 **무명 네임스페이스**를 사용해서 변수를 선언하고, 정적 링킹을 한다.
+  * 임의 시점에서 초기화가 될 지 모르는 일반 정적 클래스, 혹은 싱글턴과는 다르게 스코프가 어플리케이션의 시작부터 끝까지로 보장이 된다.
+* **처음부터 끝까지 특정 메모리 영역을 사용하기 때문에, 필수 데이터만 선언한다.**
+* **Initiate() 함수가 필요할 경우, 반드시 단언문 (assert) 을 사용해서 한 번만 초기화할 수 있도록 해야한다.**
+  * 런타임에 인스턴스 개수를 확인 할 수 밖에 없는 단점이 존재한다.
+
+``` c++
+/// header file
+/// @namespace opgs16::manager::input
+///
+namespace opgs16::manager::input {
+///
+/// @brief
+/// 
+void Initiate(GLFWwindow* window_context);
+///
+/// @brief 
+/// 
+float GetKeyValue(const std::string& key);
+ 
+} /// ::opgs16::manager::input
+```
+
+``` c++
+/// source file
+///
+/// This namespace stores variables or 
+/// constexpr variables to be used by functions.
+///
+namespace {
+using opgs16::manager::_internal::BindingKeyInfo;
+using key_map = std::unordered_map<std::string, BindingKeyInfo>;
+constexpr std::string_view input_path{ "_Setting/input.meta"sv };
+
+// Window handle pointer
+GLFWwindow* m_window;
+key_map m_key_inputs;
+} /// unnamed namespace
+
+namespace opgs16::manager::input {
+void Initiate(GLFWwindow* window_context) {
+  NEU_ASSERT(m_initiated == EInitiated::NotInitiated, debug::err_input_duplicated_init);
+  m_initiated = EInitiated::Initiated;
+  m_window = window_context;
+  ReadInputFile(input_path.data());
+}
+} /// ::opgs16::manager::input
+```
+
+* **여기서 제시한 방법이 완전한 해답은 아님을 명심한다.**
+  * 더 좋은 방법이 있으면 그걸 써도 된다. (+ 알려주세요...)
+
+### E. Error checking
+
+* **에러 체킹은 발생 즉시 처리해야만 한다. 따라서 `.IsError()` `.ErrorCheck()` 와 같은 함수로 에러 발생 이후에 뒤늦게 체킹하는 것은 금지한다.**
+* 개발은 항상 디버그 모드에서 하며, 실행 중 에러로 인해서 앞으로의 처리에 이상이 올 경우에는 주저없이 **assert 등을 사용해서 동작을 멈춘다.**
 

@@ -76,7 +76,7 @@
 > ~ LLVM Coding Standards
 
 * **영어로, 간결하게, 코드의 전반적인 행동을 써라.**
-* **디버깅용으로 상당량의 코드를 주석 처리 할 경우에는, `#if 0` 와 `#endif` 을 써서 코드를 무효화한다.**
+* **디버깅용으로 상당량의 코드를 주석 처리 할 경우에는, `#ifdef false` 와 `#endif` 을 써서 코드를 무효화한다.**
   * 어디까지나 주석은 코드에 대한 설명을 위해서만 존재한다.
 
 > **Comments are comments.  They describe the code.**
@@ -125,6 +125,7 @@ if (it->second) {
   * **함수 바디 안에서 주석을 작성할 때는 `//` 을 쓴다. 이 경우 양 끝에 주석을 한 줄씩 추가할 필요는 없다.**
   * *doxygen* 의 문서를 작성할 경우, `///` 을 쓴다. 이 때 양 끝에 한 줄씩 주석을 더 쓴다.
   * 네임스페이스의 끝, 헤더 파일 코멘트의 경우 `///` 을 쓴다.
+  * `//!` 계열의 주석을 써도 좋다.
 
 **Good**
 
@@ -283,15 +284,15 @@ if (iter != v.end()) {
 >
 > ~ LLVM Coding Standards
 
-* **코드의 모든 줄의 텍스트 수는 80 컬럼 안에서 작성되어야 한다.**
+* **코드의 모든 줄의 텍스트 수는 100 컬럼 안에서 작성되어야 한다.**
   * 코드는 여러 곳에서 보여지고 쓰여질 수 있기 때문에 최저 한계를 고려해야만 한다.
 
 ###### 예외
 
-* 주석은 URL 등이 포함될 경우에는 해당 줄에 한해 80 글자 이상을 허용한다.
+* 주석은 URL 등이 포함될 경우에는 해당 줄에 한해 100 글자 이상을 허용한다.
 * A raw-string literal may have content that exceeds 80 characters. Except for test code, such literals should appear near the top of a file.
-* `#include` 구문은 80 글자 이상을 허용한다.
-* Include guard 역시 80 글자 이상을 허용한다.
+* `#include` 구문은 100 글자 이상을 허용한다.
+* Include guard 역시 100 글자 이상을 허용한다.
 
 ### F. Must use `spaces` intead of tab
 
@@ -357,7 +358,8 @@ MUST_USE_RESULT __CDECL bool IsOk();
 ### F. 함수 호출 (Function Call)
 
 * **자리가 충분한 경우 한 줄에 쓰고, 그렇지 않은 경우 괄호 안의 인자들을 줄바꿈한다. **
-* **인자들이 모두 한 줄에 들어갈 수 없다면, 여러 줄로 나누어 쓰되 이어지는 줄은 첫번째 인자와 같은 열에 오도록 한다.**
+* **인자들이 모두 한 줄에 들어갈 수 없다면, 여러 줄로 나누어 쓰되 이어지는 줄은 첫번째 인자와 같은 열에 오도록 하는 것을 추천한다.**
+* **인자들이 모두 한 줄에 들어갈 수 없다면, 여러 줄로 나누어 쓰되 이어지는 줄은 해당 표현식에서 4 space 들여쓰기 해서 올 수 있다.**
 * **모든 인자들마다 줄 바꿈하여 한 줄에 하나씩 쓸 때는, 해당 함수로부터 4 space 들여쓰기 해서 쓴다.**
   * 혹은 세로 줄을 낭비하는 것을 줄이기 위해 여러 인자를 한 줄에 집어넣는 것을 추천한다. 
 
@@ -372,6 +374,11 @@ EFlag ret_val = DoSomething(argument1,
                             argument2,
                             argument3,
                             argument4);
+
+EFlag ret_val = DoSomething(argument1,
+    argument2,
+    argument3,
+    argument4);
 ```
 
 ``` c++
@@ -799,8 +806,8 @@ class CTester { ... };
 struct CProperty { ... };
 struct DTableElementInfo { ... };
 
-typedef std::map<const char*, UrlTableProperties*> PerpertiesMap;
-using PropertiesMap = std::map<const char*, UrlTableProperties*>;
+typedef std::map<const char*, UrlTableProperties*> TPerpertiesMap;
+using TPropertiesMap = std::map<const char*, UrlTableProperties*>;
 
 enum class EUrlTableErrors { ... }; 
 ```
@@ -811,6 +818,7 @@ enum class EUrlTableErrors { ... };
   * `E` : 열거형 타입. `enum` `enum class` 둘 다 쓰일 수 있다.
   * `I` : Interface 타입.
   * `U` : Union 타입.
+  * `T` : 별칭 타입.
 * **prefix 을 기입 시, 대문자로 기입한다.**
 
 ### N. Variable Names
@@ -1177,6 +1185,8 @@ if (raw_size < sizeof(int)) {
   * 가독성을 높이고, 유지 관리를 보다 더 수월하게 할 수 있다.
   * `enum class` 는 기존의 `enum` 과는 다르게 범위를 가지며 암시적으로 바탕 타입으로 변환이 될 수 없다.
   * `bool` 만으로 모든 플래그를 관리하려면 생각 외로 머리를 많이 굴려야 한다.
+  * 코드 읽는 양이 늘어날 수 있다.
+* **유저에게 명확하게 bool 플래그를 나타내고 싶을 경우에는 의도적으로 bool 플래그를 쓸 수 있다.**
 
 boolean 열거형 플래그는 다음처럼 작성한다.
 
@@ -1262,6 +1272,13 @@ assert(value == i++)
 ```
 
 * **기본으로 제공되고 있는 assert(expression) 은 메시지를 출력할 수 없기 때문에 메시지 출력이 가능한 이식성 있는 assert 을 만들어서 쓴다.**
+
+### T. 문자열 타입
+
+* **`char` `std::string` 이외의 다른 타입을 사용하지 않는다.**
+* **만약 특정 라이브러리에서 다른 문자열 타입을 원할 경우에는 그 상황일 때만 사용한다.**
+* **`char16_t` `char32_t` 및 `wchar_t` 을 사용하지 않는다.**
+* **왠만해서는 `std::string` 을 쓴다.**
 
 ## Et cetera
 

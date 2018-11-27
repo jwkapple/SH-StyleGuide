@@ -1,22 +1,33 @@
-# StudioN C++ Coding Style
+# `StudioN` C++ Coding Style
+
+> 2018-05-21 Under construction.
+>
+> 2018-11-27 AM 12:06 갱신. 
+> `In. Preface` 본문 추가
+> `O. C++ Standard Versions` 
+> `O. 경고를 에러같이 취급할 것` 
+> `O. Static Instance (Singleton) 의 사용을 자제할 것.` 
+> `O. RTTI 및 Exception 을 쓰지 말 것.` 본문 갱신.
+>
+> 2018-11-27 PM 01:26 갱신.
+> `문서 전체` 갱신. 더 이상 적용되지 않는 항목 삭제.
+> `T. Operator overloading` 항목만 추가. 본문 작성을 해야함.
 
 ## Introduction
 
 ### In. Preface
 
+규모가 있는 C++ 프로젝트를 진행하고자 할 때 정해진 규정을 따라서 코딩하는 것이 매우 중요합니다. 왜냐하면 프로젝트가 스케일업이 됨에 따라 관리해야 할 코드의 양도 많고 통일성을 유지해서 코드를 숙지할 수 있기 때문입니다. 그렇게 함으로써 추후에 발생하거나 발생된 버그, 성능 등을 보다 더 빨리 파악할 수 있게 됩니다.
 
+`StudioN` 에서도 다른 라이브러리 등에 영향을 받지 않은 독자적인 C++ 프로젝트를 진행할 때나 혹은 다른 라이브러리에서 컨벤션 및 규칙이 엄격히 규정되어 있지 않았을 때에 사용할 수 있는 C++ 코딩 규칙을 만들고자 합니다. 그리고 C++ 코딩 규칙을 향후 그리고 지금 진행하고 있는 프로젝트에 적용을 해서 가독성과 통일성, 및 잠재적인 버그의 발견을 줄이고자 합니다.
 
 ### In. Prerequisites
 
-이 코딩 스타일은 다음 라이브러리 혹은 관리 프레임워크를 쓸 때 완전히 적용된다.
+이 코딩 스타일은 다음 라이브러리 혹은 관리 프레임워크를 쓸 때 완전히 적용됩니다.
 
 * [**Doxygen**](http://www.stack.nl/~dimitri/doxygen/) : Generate documentation from source code, **Doxygen** is the de facto standard tool for generating documentation from annotated C++ sources.
 * [**Git**](https://git-scm.com/) : **Git** is a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency. 
 * [**fmt**](http://fmtlib.net/latest/index.html) : **fmt** (formerly cppformat) is an open-source formatting library. It can be used as a safe alternative to printf or as a fast alternative to C++ IOStreams.
-
-### In. Log
-
-* 2018-05-21 Under construction.
 
 ### In. Influenced Style guides
 
@@ -33,35 +44,60 @@
 * Constructors
   http://yosefk.com/c++fqa/ctors.html#fqa-10.12
 
-
-
 ## Overall
 
 ### O. C++ Standard Versions
 
-* **`2018-05-10` 기준, C++17 을 사용한다.**
-* **표준에 기재된 기능 외의 각 컴파일러마다 지원하고 있는 비표준 기능은 사용하지 않는다.**
-  * `module`, `_s` method 등 역시 사용할 수 없다.
+* **`2018-11-25` 기준, C++17 을 사용한다.**
+  * 다만 `pmr` 그리고 `parallel STL` 은 사용하지 않도록 한다. 
+    왜냐하면 `clang` 과 `gcc` 는 병렬 STL 의 기능들을 `<experimental/xxx>` 로 분류하고 있으며 아직까지 정식으로 편입되지 않은 상황이기 때문이다.
+    (2018-11-25 확인 https://en.cppreference.com/w/cpp/compiler_support)
+* **표준에 기재된 기능 외의 각 컴파일러마다 지원하고 있는 비표준 기능은 되도록 사용하지 않습니다.**
+  * `module`, `_s` method 등 역시 **그냥은** 사용할 수 없습니다.
+  * 만약에 굳이 사용하고자 하는 경우라면 다음과 같이 사용하자.
+    1. 비표준 기능을 매크로로 감싼다.
+    2. 매크로로 감싸는 동시에 각 C++ 컴파일러에 대한 전처리 매크로 플래그를 사용해 분기를 시킨다.
 
-### O. 경고를 에러같이 취급하라
+### O. 경고를 에러같이 취급할 것.
 
 * **컴파일 도중에 발생하는 경고는 해당 코드에 대해서 잠재적인 에러 요소를 가지고 있다는 증거이다.**
   * 값 변환을 제대로 하지 않았을 때, 등등에서 경고가 발생할 수 있다.
 * **되도록 표준 컴파일러를 채용해서 모든 경고를 출력할 수 있도록 하라.**
+  * 만약 `MSVC` 와 `Visual Studio` 을 사용해서 개발을 할 경우에는 해당 프로젝트의 C++ 로그 메시지 출력을 가장 verbose 하게 출력할 수 있도록 설정하라.
 
-### O. Static Instance 을 사용하지 마라
+### O. Static Instance (Singleton) 의 사용을 자제할 것.
 
 > Static constructors and destructors (e.g. global variables whose types have a constructor or destructor) should not be added to the code base, and should be removed wherever possible. Besides well known problems where the order of initialization is undefined between globals in different source files, the entire concept of static constructors is at odds with the common use case of LLVM as a library linked into a larger application.
 >
 > ~ LLVM Coding Standards
 
-### O. RTTI 및 Exception 을 사용하지 마라.
+* `Constructor` 와 `Desctructor` 을 가지는 정적 인스턴스를 사용할 때는 항상 주의하며, 다른 방법이 있으면 다른 방법을 택하라.
+* 정적 인스턴스의 참조나 포인터를 가지는 변수를 클래스 밖이나 함수 밖에서 설정할 때는 반드시 헤더 파일에서 `static` 을 붙여 변수를 설정하도록 한다.
+* 정적 인스턴스들을 초기화 할 때는 정적 인스턴스들 끼리 프로그램의 시작과 끝에서 한꺼번에 초기화를 행할 수 있도록 한다.
+* 정적 인스턴스들의 `Constructor` 와 `Destructor` 안에서는 다른 정적 인스턴스들에 종속성이 없는 코드를 설정한다.
+  * 부득이 한 경우에는 `assertion` 등을 사용해서 해당 정적 인스턴스가 초기화가 되었는가를 확인하는 코드를 맨 앞에 넣어 검증한다.
 
-* Querying the type of an object at run-time frequently means a design problem. Needing to know the type of an object at runtime is often an indication that the design of your class hierarchy is flawed.
+### O. RTTI 및 Exception 을 쓰지 말 것.
 
-  Undisciplined use of RTTI makes code hard to maintain. It can lead to type-based decision trees or switch statements scattered throughout the code, all of which must be examined when making further changes.
+> https://msdn.microsoft.com/en-us/library/hh279678.aspx
 
+> Querying the type of an object at run-time frequently means a design problem. Needing to know the type of an object at runtime is often an indication that the design of your class hierarchy is flawed.
+>
+> Undisciplined use of RTTI makes code hard to maintain. It can lead to type-based decision trees or switch statements scattered throughout the code, all of which must be examined when making further changes.
 
+* **`RTTI` 을 금지한다.** RTTI (Run-Time Type Information) 은 런타임에 타입 정보를 조회하는 C++ 의 기능이다. 하지만 RTTI 은 C++ 의 기본 원칙인 `Zero Overhead Principle` 에 전면적으로 위배된다. 즉 런타임 코스트가 상당량 든다.
+  * 뿐만 아니라 `typeid()` 을 사용해서 가져오는 `RTTI` 정보의 참조는 같은 타입일지라도 다를 수가 있다.
+  * 또한 C++ 에서는 해당 `RTTI` 로 가져오는 타입 정보에 대해 문자열 구문에 대해 구체적인 정보 없이 컴파일러 구현에 의존할 수 있도록 했다. 따라서 각종 컴파일러에서 프로젝트를 구동시키고자 할 경우에는 `RTTI` 의 사용이 금기시 된다.
+  * `RTTI` 을 사용하지 않고도 컴파일 타임에 타입의 정보를 추측할 수 있는 기법이 존재한다.
+* **`Exception` 을 쓰는 것을 금지한다.** 왜냐하면 현재 C++ 에 구현된 `Exception` 역시 `RTTI` 와 마찬가지로 C++ 의 성능 법칙에 위배되기 때문이다.
+  * 일반 코드에서 예외를 사용해도 에러가 일어나지 않고 원하는 로직이 실행이 된다고 하면 이는 `try` `catch` 을 사용해 예외를 사용하지 않은 구문과 동일한 성능을 보장한다.
+  * 하지만 `try` `catch` 을 사용해 예외를 사용해서 에러 핸들링을 시도하면, `Stack unrolling` 이라고 하는 예외에 대해서 해당 예외를 처리할 수 있는 `catch` 구문이 있는가를 스택을 뒤집어가면서 확인하고자 한다. 이로 인해 상당량의 성능 저하가 일어나버린다.
+  * 또한 `try` `catch` 를 사용해 에러 핸들링을 한다고 한들, 해당 에러가 복구 가능한 에러인지 복구 불가능한 에러인지를 파악하기 힘들다. 예외 안정성 역시 보장할 수 없다.
+    * **모든 `Exception` 은 `Error` 라고 한정지을 수 없다..**
+  * `Constructor` 에서의 에러 핸들링은 `assertion` 으로만 한정한다. 만약 예외 사항이 일어날 수 있다면 `Constructor` 가 있는 타입을 생성하기 전에 검증 코드를 직접 거치도록 한다.
+    * `Destructor` 의 경우에는 **반드시 성공** 해야하기 때문에 검증 코드를 따로 만들지 않아도 된다.
+* 에러 핸들링에 관해서 추천할 만한 라이브러리는 `boost::outcome` 이 있다. (실 사용은 아직 X)
+  https://ned14.github.io/outcome/
 
 ## Comments
 
@@ -90,10 +126,13 @@
 **Good**
 
 ``` c++
-if (it->second) {
+if (it->second != nullptr) 
+{
     // Codes...
-#if 0
-    if (auto& additional_list = it->second->GetChildList(); !additional_list.empty()) {
+#ifdef false
+    if (auto& additional_list = it->second->GetChildList();
+        additional_list.empty() == false) 
+    {
         it_list.emplace(++it);
         tree_list.emplace(&additional_list);
         it_list.emplace(additional_list.begin());
@@ -184,9 +223,9 @@ or
 
 ### C. File Header
 
-* **`.h` `.cc` 불문하고 모든 파일들은 머리 부분에 이 파일의 기본적인 목적을 써라.**
-* **해당 파일을 변경했을 때는 변경 사유 등을 날짜와 같이 써라.**
-* **프로젝트에 적용되고 있는 라이선스가 있을 경우에는, 원문 혹은 요약문을 맨 위에 붙여라**
+* Include Guard 적용 시, `#pragma once` 을 사용하지 않는다.
+
+* **프로젝트에 적용되고 있는 라이선스가 있을 경우에는, 원문 혹은 요약문을 맨 위에 붙인다.**
 
 > Every file should contain license boilerplate. Choose the appropriate boilerplate for the license used by the project (for example, Apache 2.0, BSD, LGPL, GPL).
 >
@@ -197,26 +236,12 @@ or
 ``` c++
 ///
 /// @license BSD 2-Clause License
-///
 /// Copyright (c) 2018, Jongmin Yun(Neu.), All rights reserved.
 /// If you want to read full statements, read LICENSE file.
 ///
-/// @file Manager/input.cc
-///
-/// @brief
-/// blah blah something...
-///
-/// @author Jongmin Yun
-///
-/// @log
-/// 2018-03-03 Refactoring.
-/// 2018-05-20 Get rid of singleton pattern and rebuild it to namespace.
-///
-/// @todo Replace own input data style to json.
-///
 ```
 
-* **만약 `.h` 파일이 여러가지 추상화를 가지고 있으면, 해당 파일의 전반적인 내용에 대해서 1, 2 줄로 쓴다.**
+* **만약 `.h` 파일이 여러가지 추상화를 가지고 있으면, 해당 파일의 전반적인 내용에 대해서 1, 2 줄로 쓰는 것을 추천한다.**
   * 구체적인 문서는 해당 추상화 클래스 및 기능의 앞 부분에서 코멘트를 쓴다.
 
 ### C. Implementation Comments
@@ -263,63 +288,51 @@ if (iter != v.end()) {
 
 * **`doxygen` 으로 todo 을 쓰되, 소괄호 `()` 안에 issue 번호를 기입한다.**
 
-
-
 ## Formatting
 
 ### F. Line Length
 
-> *Why Not Both?*
-> ~ https://softwareengineering.stackexchange.com/questions/184037/descriptive-naming-vs-80-character-lines
->
-> http://katafrakt.me/2017/09/16/80-characters-line-length-limit/
->
-> The optimal line length for your body text is considered to be 50-60 characters per line, including spaces (“Typographie”, E. Ruder). Other sources suggest that up to 75 characters is acceptable.
->
-> ~ https://baymard.com/blog/line-length-readability
->
-> https://wrongsideofmemphis.wordpress.com/2013/03/25/80-chars-per-line-is-great/
->
-> The longer answer is that there must be some limit to the width of the code in order to reasonably allow developers to have multiple files side-by-side in windows on a modest display. If you are going to pick a width limit, it is somewhat arbitrary but you might as well pick something standard. Going with 90 columns (for example) instead of 80 columns wouldn’t add any significant value and would be detrimental to printing out code. Also many other projects have standardized on 80 columns, so some people have already configured their editors for it (vs something else, like 90 columns).
->
-> ~ LLVM Coding Standards
+* **코드의 모든 줄의 텍스트 수는 최대 `120` 컬럼 안에서 작성되어야 한다.**
+  * 코드는 여러 곳에서 보여지고 쓰여질 수 있기 때문에 최대 한계를 고려해야만 한다.
+  * 이전에는 80 컬럼이었지만 변수의 이름을 통한 코드 읽기 및 보다 더 정확한 구문 지시 등을 고려 시 120 컬럼이 가장 적당하다고 생각함.
+  * 현재 거의 모든 개발 환경은 해상도가 `1920x1080` 이기 때문에 최대 120 컬럼을 지원한다고 생각함.  
+* **코드의 모든 줄의 텍스트 수는 되도록 `100` 컬럼 안에서 작성하는 것이 바람직하다.**
 
-* **코드의 모든 줄의 텍스트 수는 100 컬럼 안에서 작성되어야 한다.**
-  * 코드는 여러 곳에서 보여지고 쓰여질 수 있기 때문에 최저 한계를 고려해야만 한다.
-
-###### 예외
-
-* 주석은 URL 등이 포함될 경우에는 해당 줄에 한해 100 글자 이상을 허용한다.
-* A raw-string literal may have content that exceeds 80 characters. Except for test code, such literals should appear near the top of a file.
-* `#include` 구문은 100 글자 이상을 허용한다.
-* Include guard 역시 100 글자 이상을 허용한다.
+* 주석에 URL 등이 포함될 경우에는 해당 URL 이 들어간 줄에 한해 120 글자 이상을 허용한다.
 
 ### F. Must use `spaces` intead of tab
 
 * **Indent 는 오직 Space 만 사용하며, 2 space 을 사용한다.**
   * `tab` 키를 누를 때, 2 space 을 띄우게끔 설정하는 것도 좋다.
-  * 80 characters 의 제약을 맞추기 위해 4 space 대신 2 space 을 사용한다.
+  * 컬럼의 제약을 맞추기 위해 ~~4 space~~ 대신 2 space 을 사용한다.
 * 코드 수정 도중에 스타일을 따르지 않는 코드를 수정할 때에는 전체 소스 파일을 반영하지 않도록 해야하며 오직 수정하고자 하는 부분의 최소 단위만 수정한다.
   * it makes for incredible diffs that are absolutely worthless.
 
 
-### F. Fundtion Declaration and Definition
+### F. Function Declaration and Definition
 
-* **Return type 은 함수 시그니쳐의 같은 줄에 온다.**
-* **인자 (parameter) 역시 함수 시그니쳐의 같은 줄에 오도록 한다. 만약 그러지 못할 경우에는 다음 줄에 오게 한다.**
+* **Return type 은 함수 시그니쳐의 같은 줄에 오게 함이 바람직하다.**
+  * 만약 속성을 포함한 Return type 이 길 경우에는, 함수 이름과 인자를 적는 줄의 윗줄에 적는다.
+* Return type 을 반환한 경우에는 `[[nodiscard]]` 을 **반드시 적어야 한다.**
+  * `[[nodiscard]]` 는 C++17 에서 추가된 속성으로 함수에서 반환된 객체를 반드시 받아서 처리해야 한다고 컴파일러에게 알린다. 만약 `[[nodiscard]]` 가 적용된 함수에서 반환된 객체를 바깥에서 처리하지 않을 경우에는 컴파일 에러가 발생한다.
+    * 이를 통해 잠재적인 버그가 일어날 수 있는 가능성을 줄여준다.
+* **인자 (parameter) 리스트는 함수 시그니쳐의 같은 줄에 오도록 한다. **
+  **만약 그러지 못할 경우에는 다음 줄에 오게 한다.**
   * 길어서 정렬 조차 못할 경우에는, 모든 인자를 4 indent 을 사용해서 정렬하게 할 수 있다.
 
 **Good**
 
 ``` c++
-ReturnType ClassName::FunctionName(Type par1, Type par2) {
+ReturnType ClassName::FunctionName(Type par1, Type par2)
+{
   DoSomething();
 }
 ```
 
 ``` c++
-ReturnType ClassName::LongLongFunctionName(Type par1, Type par2,
-                                           Type par3) {
+ReturnType ClassName::LongLongFunctionName(Type par1, Type par2, 
+                                           Type par3)
+{
   DoSomething();
 }
 ```
@@ -328,32 +341,44 @@ ReturnType ClassName::LongLongFunctionName(Type par1, Type par2,
 ReturnType ClassName::SoMuchLongLongFunctionName(
     Type par1,
     Type par2,
-    Type par3) {  // 4 line indent
+    Type par3)    // 4 line indent
+{
   DoSomething();  // 2 line indent
 }
 ```
 
-*Google C++ Styleguide* 을 사용해서 다음을 준수한다.
-
 * 인자 이름은 정확한 역할 및 의도를 가져야 한다.
 * 함수 정의에서 쓰이지 않는 인자는 **정의에서 생략될 수 있다**.
-* 반환 타입과 함수 이름을 한 줄에 같이 쓸 수 없다면, 이 마저도 줄을 띄워 쓸 수 있다.
 * `()` 괄호의 여는 괄호는 항상 함수 이름 옆에 와야하며, 띄어쓰기를 금한다.
-* `{}` 블록 괄호의 여는 괄호는 항상 함수 선언 시그니쳐의 마지막 줄의 끝에 와야한다. (K&R 을 선호한다)
-* 인자 리스트와 `{}` 블록 괄호 사이에는 띄어쓰기가 와야한다.
-* 기본 들여쓰기는 **2 spaces** 이다.
-* 인자들을 여러 줄로 정렬할 때는 **4 spaces** 로 정렬한다.
-* 매크로, 속성 등은 함수 시그니쳐의 맨 앞에 와야 한다.
-
-**Good**
+* 소스 파일의 해석 단위 안에서만 쓰이는 함수를 선언하거나 정의할 경우에는 **반드시 무명 네임스페이스 안**에서 정의한다.
+* 함수로 전달되는 모든 인자들은 값이거나 레퍼런스여야 한다. `*` 의 사용은 권장하지 않는다. 이는 인자로 넘겨준 레퍼런스가 변경이 될 때에도 변함없다.
+  - 불필요한 null check 을 없애기 위해서.
+  - 레퍼런스로 전달되는 인자 타입은 `const` 로 수식하는 것을 권장한다.
+* 매크로를 사용해서 `_MIN_` `_MINOUT_` `_MOUT_` 과 같이 인자의 용도를 설정해 두는 것도 바람직할 것이다.
 
 ``` c++
-MUST_USE_RESULT __CDECL bool IsOk();
+void Foo(_MIN_ const std::string& in, _MINOUT_ std::string& out);
 ```
 
 ### F. Lambda Expression
 
+> [Closure (computer programming)](https://en.wikipedia.org/wiki/Closure_(computer_programming))
 
+* `Lambda` 는 클로져를 생성할 수 있는 `C++11` 부터 추가된 문법 기능 중 하나이다.
+* 재귀를 목적으로 한 `Lambda` 함수의 구현은 금지한다. (`Lambda` 는 시그니쳐가 정확하지 않기 때문에 재귀가 불가능하지만, 여러 가지 편법을 통해 재귀를 구현할 수 있도록 할 수는 있다.)
+* `Lambda` 가 자기 완결적임이 확실한 경우에는 캡쳐를 `this` 혹은 `&` 로 쓸 수 있다. 하지만 자기 완결적이지 않다면 **반드시 `=` 을 써서 값을 복사하도록 하거나, 아니면 `C++14` 에서 추가된 다음 구문을 사용해 캡쳐를 한다.**
+
+``` c++
+int x = 4;
+auto y = [&r = x, x = x + 1]() -> int
+{
+    r += 2;
+    return x * x;
+}(); // updates ::x to 6 and initializes y to 25.
+```
+
+* 코드 구조를 리팩터링할 때 혹은 코드 구문의 캡슐화를 실시할 때, 캡슐화된 코드 구조를 바깥에서 접근하게 하고 싶게 하지 않다면 `Lambda` 을 써서 함수 본문에 설치하는 것도 좋은 방법이다.
+  * 다만 이 경우에는 `static` 을 반드시 써야한다.
 
 ### F. 함수 호출 (Function Call)
 
@@ -366,16 +391,11 @@ MUST_USE_RESULT __CDECL bool IsOk();
 **Good**
 
 ``` c++
-EFlag ret_val = DoSomething(argument1, argument2, argument3);
-EFlag ret_val = DoSomething(argument1, argument2,
+EFlag retVal = DoSomething(argument1, argument2, argument3);
+EFlag retVal = DoSomething(argument1, argument2,
                             argument3);
-
-EFlag ret_val = DoSomething(argument1,
-                            argument2,
-                            argument3,
-                            argument4);
-
-EFlag ret_val = DoSomething(argument1,
+EFlag retVal = DoSomething(
+    argument1,
     argument2,
     argument3,
     argument4);
@@ -395,8 +415,24 @@ if (...) {
 * **만일 함수의 인자에 표현식을 사용할 때 가독성이 떨어진다면, 해당 표현식의 결과를 가지는 변수를 만들어 인자로 넘긴다.**
 
 ``` c++
-int my_heuristic = scores[x] * y + bases[x];
-EDoFlag result = DoSomething(my_heuristic, x, y, z);
+int myHeuristic = scores[x] * y + bases[x];
+EDoFlag result  = DoSomething(myHeuristic, x, y, z);
+```
+
+### F. 중괄호 방식
+
+* **`{}` 블록 괄호의 여는 괄호는 항상 함수 정의 시그니쳐, 클래스 정의, 조건 분기문의 다음 줄 시작 지점에 와야한다.**
+  * 만약 구문이 짧아서 한 줄로 해당 구문의 정의 및 코드 작성을 마칠 수 있다고 하면 `{}` 을 포함해서 한 줄에 옮긴다.
+
+``` c++
+class FClass final
+{
+    // LIKE THIS
+};
+```
+
+``` c++
+if (expression == false) { assert(false); }
 ```
 
 ### F. 중괄호 초기화 리스트 (Braced Initializer List)
@@ -405,36 +441,46 @@ EDoFlag result = DoSomething(my_heuristic, x, y, z);
 
 ### F. 조건 분기문 (Conditional branch)
 
-* **조건 표현식은 `()` 양 옆 사이에 띄어쓰기가 없어야 한다.**
-* **`else` `else if` 구문을 적을 때는 then `}` 중괄호 바로 뒤에 띄어쓰기 후, 적는다.**
+* 조건 표현식은 무조건 `== true` 혹은 `== false` 또는 `== Enum` `== nullptr` 로 끝내야 한다. 일반 타입에서 `bool` 타입으로 자동으로 변환되어 참비여부를 계산하는 것을 막아 가독성을 증가시키고 버그를 막을 수 있기 때문이다.
 
 ``` c++
-if (condition) {
-  ...
-} else if (...) {
-  ...
-} else {
-  ...
+// Do like this.
+if (mPtrInstance == nullptr) { return; }
+// Do not this.
+if (!mPtrInstance) { return; }
+```
+
+* **조건 표현식은 `()` 양 옆 사이에 띄어쓰기가 없어야 한다.**
+* **`else` `else if` 구문을 적을 때는 다음과 같은 형식을 따른다.**
+
+``` c++
+if (condition == true) 
+{
+  // ...
+} 
+else if (...) 
+{
+  // ...
+} 
+else 
+{
+  // ...
 }
 ```
 
 * **짧은 조건 분기문은 가독성을 높이기 위해 한 줄로 붙여 쓸 수 있다. `else` 가 올 경우에는 두 줄로 써야하며, 만약 분기문 중 하나가 길어질 경우에는 원래 조건문 포맷을 따라야 한다.**
+  * 모든 `then` 구문과 `else` 구문은 무조건 `{}` 을 써서 해당 구문이 `then` 이거나 `else` 임을 나타내야 한다.
 
 **Good**
 
 ``` c++
-if (x == EEnum::Foo) return new Foo();
-
-if (x == EEnum::Foo) 
-  return new Foo();
+if (x == EEnum::Foo) { return new Foo(); } // 1
+if (x == EEnum::Foo) { return new Foo(); } // 2
+else                 { return new Nop(); }
+if (x == EEnum::Foo) { return new Foo(); } // 3
 else 
-  return new Nop();
-
-if (x == EEnum::Foo) {
-  return new Foo();
-} else {
-  ...
-  ...
+{
+  // ...
 }
 ```
 
@@ -442,46 +488,26 @@ if (x == EEnum::Foo) {
 
 ``` c++
 if (x == EEnum::Foo) return new Foo(); 
-else return new Nop();
-if (x == EEnum::Foo) return new Foo(); else return new Nop();
+else                 return new Nop();
+if (x == EEnum::Foo) { return new Foo(); } else { return new Nop(); }
 if (x == EEnum::Foo) return new Foo();
 else {
   ...
-  ...
 }
 ```
 
-* **`if` 구문에서 중괄호를 쓸 때는 모든 경우에 항상 같이 중괄호를 쓰거나 말아야 한다.**
-
-**Good**
+* **에러 출력 혹은 즉각 return 구문이 있는 절을 if 로 분기를 나눠서 쓰고자 할 때는, `then` 구문에 에러 혹은 처리 후 리턴 (early return) 을 쓸 수 있도록 한다.**
 
 ``` c++
-if (complex_condition) {
-  DoSomething();
-} else {
-  DoOtherThing();
-}
-```
-
-~~**Bad**~~
-
-``` c++
-if (complex_condition) {
-  DoSomething();
-} else
-  DoOtherThing();
-```
-
-* **에러 출력 혹은 즉각 return 구문이 있는 절을 if 로 분기를 나눠서 쓰고자 할 때는, `then` 구문에 에러 혹은 immediate return 을 쓸 수 있도록 한다.**
-
-``` c++
-float GetKeyValue(const std::string& key) {
+[[nodiscard]] float GetKeyValue(const std::string& key) 
+{
   NEU_ASSERT(m_initiated == EInitiated::Initiated, debug::err_input_not_initiated);
 
-  if (IsKeyExist(key) == EKeyExist::NotExist) {
+  if (IsKeyExist(key) == EKeyExist::NotExist) 
+  {
     PUSH_LOG_ERRO("fuck");
-		return 0.f;
-	}
+    return 0.f;
+  }
 
   return m_key_inputs[key].value;
 }
@@ -489,20 +515,21 @@ float GetKeyValue(const std::string& key) {
 
 ### F. 루프문 (Loops)
 
-* **한 줄만 실행하는 루프문에서는 `{}` 중괄호는 쓰지 않아도 된다.**
-* **빈 루프 구문은 `{}` 빈 중괄호 구문 혹은 `continue` 을 사용해야 한다. 그렇지 않으면 해당 구문이 무엇을 하는가 파악 할 수가 없다.**
+* 루프문도 `{}` 의 사용을 강제한다.
+* **빈 루프 구문은 `{}` 빈 중괄호 구문 혹은 `continue` 을 사용해야 한다.**
+  * `;` 혹은 `{}` 을 사용하게 되면 해당 구문이 어떤 용도로 쓰이는 지 파악이 어려울 뿐더러 가독성이 저하된다.
 
 ``` c++
 while (condition) {} // Repeat test until it retuens false.
-while (condition) continue;
+while (condition) { continue; }
 
 for (int i = 0; i < gk_some_number; ++i) {}
-for (int i = 0; i < gk_some_number; ++i) continue;
+for (int i = 0; i < gk_some_number; ++i) { continue; }
 ```
 
 ### F. 스위치문 (Switch)
 
-* **`switch` 구문의 `case ` 블록은 중괄호를 쓸 수도 있고 쓰지 않을 수도 있다. 만약에 중괄호를 쓴다면 여는 괄호 `{` 는 `case` 블록의 바로 뒤에 와야 한다.**
+* **`switch` 구문의 `case ` 블록은 중괄호를 쓸 수도 있고 쓰지 않을 수도 있다. 만약에 중괄호를 쓴다면 여는 괄호 `{` 는 `case` 블록의 밑 줄에 둔다**
 * **의도적인 *Fall through* 을 사용하는 case 는 마지막 줄에 속성 `[[fallthrough]]`[link](http://en.cppreference.com/w/cpp/language/attributes) 을 붙인다.**
 
 ``` c++
@@ -513,12 +540,12 @@ switch (x) {
   case 43:
    	...
     break;
-  default: assert(false);
+  default: assert(false); break;
 }
 ```
 
 * **열거형 타입을 `case` 로 하는 `switch` 문이 아닐 경우, `switch` 문은 항상 `default` 케이스를 구현해야 한다. **
-* **일반 동작에서 `default` 케이스가 실행이 되지 않을 것이라고 설계한 경우에는 즉각적인 에러를 띄우도록 해야한다.**
+  * 일반 동작에서 `default` 케이스가 실행이 안된다고 설계한 경우에는 `default` 에서 바로 에러를 띄우도록 해야한다.
 
 ``` c++
 switch (x) {
@@ -530,8 +557,7 @@ switch (x) {
 ### F. Pointer and Reference Expressions
 
 * **`.` 혹은 `->` 연산자 뒤, 앞에 공백이 있어서는 안된다.**
-* **`*` 혹은 `&` 을 변수 이름쪽에 붙일 지, 타입에 붙일 지는 어떻게 하든 상관은 없으나 프로젝트에 걸쳐서  한 가지 방법을 유지해야 한다.**
-  * 다만, `char * c ` 와 같이 공백을 양 옆에 두는 것은 금지한다.
+* **`*` 혹은 `&` 는 `type`의 바로 뒤에 붙인다. **
 
 ``` c++
 char* c;
@@ -540,14 +566,17 @@ const std::string& str;
 
 ### F. 불리언 표현식 (Boolean Expression)
 
-* **만약 불리언 표현식이 기존 80 글자보다 크다면,  줄을 나눠서 써라.**
-  **나눠서 쓰는 경우에는 4 space indent 을 사용한다.**
+* 만약 불리언 표현식의 전체 길이가 허용 글자 수보다 길다면  줄을 나눠서 써라.
+  나눠서 쓰는 경우에는 4 space indent 을 사용한다.
+  * 불리언 표현식의 각 조건문을 나눌 때는 아래의 예시처럼 `&&` 및 `||` 을 각 구문의 앞에 오도록 한다.
 
 ``` c++
-if (this_one_thing > this_other_thing &&
-    a_third_thing == a_fourth_thing &&
-    yet_another && last_one) {
-  ...
+if (this_one_thing > this_other_thing 
+    && a_third_thing == a_fourth_thing 
+    && yet_another == true
+    && last_one == false) 
+{
+  // ...
 }
 ```
 
@@ -556,6 +585,7 @@ if (this_one_thing > this_other_thing &&
 * **uniform initialization `{}` 을 가급적 사용한다.**
   * *Uniform initialization* 은 Narrowing Conversion 을 컴파일 타임에서 막기 때문에 사전에 에러를 방지한다.
 * **생성자에 std::initializer_list 가 인자로 들어갈 경우에는 `{}` 중괄호 초기화 대신에 `()` 을 사용한다.**
+* 구조체 타입의 멤버 변수, `static` 을 포함한 모든 변수는 기본값으로 초기화 해야한다.
 
 ``` c++
 std::vector<int> v(100, 1);  // A vector containing 100 items: All 1s.
@@ -564,33 +594,28 @@ std::vector<int> v{100, 1};  // A vector containing 2 items: 100 and 1.
 
 ### F. 네임스페이스 (Namespace)
 
-* **네임스페이스의 내용들은 들여쓰기를 하지 않는다.**
-* **네임스페이스를 끝낼 때, `}` 닫는 중괄호 뒤에 해당 네임스페이스의 전체 계층 구조를 코멘트로 남긴다.**
-
-``` c++
-namespace nm_a {
-namespace nm_b {
-namespace nm_c {
-	...
-} // ::nm_a::nm_b::nm_c
-} // ::nm_a::nm_b
-} // ::nm_a
-```
+* **네임스페이스 안의 내용들은 들여쓰기를 하지 않는다.**
+* **네임스페이스를 끝낼 때, `}` 닫는 중괄호 뒤에 해당 네임스페이스의 계층 구조를 주석으로 남긴다.**
 
 * **C++17 에서 추가된 중첩 네임스페이스 기능은 파일 당 하나의 네임스페이스의 내용을 구현할 때만 사용한다.**
 
 ``` c++
-namespace nm_a::nm_b::nm_c {
+namespace nm_a::nm_b::nm_c 
+{
   ...
-} // ::nm_a::nm_b::nm_c
+} /// ::nm_a::nm_b::nm_c namespace
 ```
+
+* 무명 네임스페이스는 `.cc` 소스 파일의 맨 윗단에서만 정리해서 사용한다.
 
 ## Header file
 
 ### H. File type specifier
 
-선언을 담는 헤더 파일은 `.h` 의 확장자를 가진다.
-구현체를 담는 파일은 `.cc` 의 확장자를 가진다.
+|           | 확장자 |
+| :-------- | :----- |
+| 헤더 파일 | `.h`   |
+| 소스 파일 | `.cc`  |
 
 ### H. Define(Include) Guard
 
@@ -622,7 +647,7 @@ namespace nm_a::nm_b::nm_c {
 
 ###### 예외
 
-프로젝트에 정식으로 포함되지 않을, 임시 파일에는 `#pragma once` 을 쓸 수 있다. 다만 실제 프로젝트에 반영할 때는 위의 사항을 지켜야 한다.
+프로젝트에 정식으로 포함되지 않을 임시 파일에는 `#pragma once` 을 쓸 수 있다. 다만 실제 프로젝트에 반영할 때는 위의 사항을 지켜야 한다.
 
 ### H. Header Include Order
 
@@ -671,12 +696,10 @@ $(ProjectDir)Include
 * **구현 파일 (`.cc` 파일) 에서 헤더 파일을 포함할 때는 다음 순서대로 헤더 파일을 가져온다.**
 
 1. 구현에 쓰일 헤더 선언 파일
-2. 공백
-3. C 표준 헤더 파일
-4. C++ 표준 헤더 파일
-5. 공백
-6. Third-party 라이브러리 헤더 파일
-7. 현재 프로젝트에서 가져올 부수적인 헤더 파일
+2. C 표준 헤더 파일
+3. C++ 표준 헤더 파일
+4. Third-party 라이브러리 헤더 파일
+5. 현재 프로젝트에서 가져올 부수적인 헤더 파일
 
 **Good**
 
@@ -711,15 +734,13 @@ $(ProjectDir)Include
 > 참고
 > https://stackoverflow.com/questions/2762568/c-c-include-file-order-best-practices
 
-*  **C++ 에서의 C 표준 파일은 C++ 표준 헤더로도 바꿀 수 있으나, 일관성을 유지하라**
+*  **C++ 에서의 C 표준 파일은 C++ 표준 헤더로도 바꿀 수 있으나, 일관성을 유지할 것.**
 
-어떤 파일에서는 `stdio.h` 을 인클루드 하고, 어떤 다른 파일에서는 `cstdio` 을 인클루드하는 등의 행동은 하지마라.
+어떤 파일에서는 `stdio.h` 을 인클루드 하고, 어떤 다른 파일에서는 `cstdio` 을 포함하는 행동은 하지말 것.
 
 * **위의 인클루드 순서를 유지하면서, 알파벳 이름 순으로 인클루드 하라.**
-* **You should include all the headers that define the symbols you rely upon, except in the unusual case of forward declaration. If you rely on symbols from bar.h, don't count on the fact that you included foo.h which (currently) includes bar.h: include bar.h yourself, unless foo.h explicitly demonstrates its intent to provide you the symbols of bar.h**
-* **하나의 해석 단위의 최종 파일은 한 개의 `.cc` 로 끝나야 하며, 해석 단위 중간에 `.cc` 파일이 포함되서는 안된다.**
-  * 즉, `#include` 를 할 때 `.cc` 파일의 인클루드는 하지 않는다.
-* **인클루드는 오직 `.h` 파일 또는 `헤더 파일` 만 한다.**
+* `#include` 시에 `.cc` 파일의 인클루드는 하지 않는다.
+  * **헤더 파일만 include 한다.**
 
 ###### 예외
 
@@ -738,57 +759,28 @@ $(ProjectDir)Include
 
 ### H. Forward Declaration
 
-> ddf
->
-> ~ [Should one use forward declarations instead of includes wherever possible?](https://stackoverflow.com/questions/9906402/should-one-use-forward-declarations-instead-of-includes-wherever-possible)
-
-
+* 헤더 파일과 소스 파일이 있을 때, 소스 파일에서 다른 헤더 파일에 존재하는 타입의 정보를 사용해 쓰지만 헤더 파일에서는 그렇지 않고 참조 혹은 포인터의 형태로만 취급한다고 하면 **헤더 파일에서만 전방 선언**을 사용한다.
+* 만약 함수의 전방 선언이 필요할 경우에는 `.cc` 소스 파일의 맨 윗단에서 선언을 한다.
 
 ## Naming
 
 ### N. File Names
 
-* **파일 이름은 모두 소문자 및 `_` 만을 사용해야 한다.**
-* 각 단어마다 `_` 을 사용해서 띄어쓰는 것을 추천한다.
-* 테스트용 파일 혹은 특별한 용도로 작성된 파일의 경우에는 본 이름 뒤에 `_test` 등의 용도를 덧붙인다.
-
-**Good**
+* 파일 이름은 첫 글자가 대문자인 **Camel case** 을 사용한다.
 
 ``` c++
-my_useful_class.cc
-myusefulclass.cc
-myusefulclass_test.cc
+MyUsefulClass.cc   // Good
+my_useful_class.cc // Bad
 ```
 
 * **파일 이름을 작성할 때는 이름을 구체적으로 작성한다.**
 
-**Good**
-
 ``` c++
-http_server_logs.h
+HttpServerLogs.h // Good
+logs.h           // Bad
 ```
 
-~~**Bad**~~
-
-``` c++
-logs.h
-```
-
-* **파일 안에 하나의 클래스 추상화만 있을 때는 해당 클래스의 이름을 따와서 파일 이름을 작성하는 것을 추천한다.**
-* **만약, 해당 파일이 있는 폴더의 이름으로 파일의 쓰임새를 확실히 알 수 있으면, **
-  **간결하게 작성한다.**
-  * 이 경우 파일의 이름을 구체적으로 쓰면 읽기 매우 번거롭다.
-
-``` c++
-// Include
-// L Manager
-//   L Internal
-//     L input.h
-//     L font.h
-//   L input.h
-//   L font.h
-//   L object.h
-```
+* **어떤 파일 안에 하나의 타입 정의만 있을 때는 해당 타입 이름으로 파일 이름을 작성하는 것을 추천한다.**
 
 ### N. Type Names
 
@@ -801,8 +793,8 @@ logs.h
 **Good**
 
 ``` c++
-class CTable { ... };
-class CTester { ... };
+class  CTable { ... };
+class  CTester { ... };
 struct CProperty { ... };
 struct DTableElementInfo { ... };
 
@@ -813,69 +805,50 @@ enum class EUrlTableErrors { ... };
 ```
 
 * **만일의 경우, 해당 프로젝트를 사용하는 제 3 자가 만들어낼 임의 타입과 구분을 지어야 한다면, `C` `E` `D` `M` 등과 같은 prefix 을 타입 이름의 앞에 넣을 수 있다.**
-  * `C` : 일반 Class. 정보 외에 동작을 넣을 수 있다.
+  * `C, F` : 일반 Class. 정보 외에 동작을 넣을 수 있다.
   * `D` : POD 혹은 연산 없이 자료 정보만을 가지고 있는 타입.
   * `E` : 열거형 타입. `enum` `enum class` 둘 다 쓰일 수 있다.
   * `I` : Interface 타입.
   * `U` : Union 타입.
-  * `T` : 별칭 타입.
+  * `T` : 별칭 타입 혹은 템플릿 타입
+  * `R` : 리플렉션 구현체 타입
+  * `M` : 싱글턴 (static instance) 타입
 * **prefix 을 기입 시, 대문자로 기입한다.**
 
 ### N. Variable Names
 
-* **모든 변수의 이름 및 멤버 변수의 이름은 `_` 을 쓰거나 명사로 끝나고, 소문자로만 쓴다.**
-  * 이름 맨 앞에 `_` 은 올 수 없다.
-* **연산을 가지는 `C` 구조체의 멤버 변수의 경우, 각 함수의 로컬 변수와 구분하기 위해 `m_` 을 해당 변수의 앞에 기입한다.**
-* **연산을 가지지 않는 `D` 구조체의 멤버 변수의 경우, `m_` 을 붙이지 않는다.**
-* **구조체의 논리적 타입을 불문하고, `static` 변수의 경우에는 항상 `s_` 을 붙인다.**
-  * `this->` 을 사용하는 것은 타자양이 많을 뿐만 아니라, 너무 번거롭다.
-  * C++ 에서는 이런 방식을 사용하지만, 다른 언어에서는 다른 방식을 사용하라.
+* **모든 변수의 이름은 `m` `s` `k` `g`로 시작하는 카멜 케이스 혹은 일반 카멜 케이스를 따른다.**
+* 모든 구조체 타입의 멤버 변수의 경우, 각 함수의 로컬 변수와 구분하기 위해 `m` 을 해당 변수의 앞에 기입한다.
+* `static` 변수의 경우에는 항상 `s` 을 붙인다.
+* `constexpr` (C++17) `consteval` (C++20) `static const` 으로 지정된 경우에는 항상 맨 앞에 `k` 을 붙인다.
+  * 만일 `static` 과 `const` `constexpr` 상수성이 같이 올 경우에는 `k` 만을 덧붙인다.
+* 최소 namespace 의 범위를 가지는 Global variable 은 `g` 을 사용한다.
+* `this->` 의 사용을 지향한다. 
+  컬럼 허용량이 120자로 늘었기 때문에 `this->` 을 사용하는 것이 가독성에는 오히려 더 도움을 준다.
 
 **Good**
 
 ``` c++
-class DDatabaseItem {
+class DDatabaseItem final
+{
 public:
   // Getter Setter.
 private:
-  std::string name;
-  uint32_t value;
+  std::string mName  = {};
+  uint32_t    mValue = 0;
 };
 
-class CDatabase {
+class CDatabase final
+{
 public:
   // ...
 private:
-  using InformationMap = std::unordered_map<std::string, DDatabaseItem*>;
-  InformationMap m_info_map;
-  static bool s_is_flaged;
+  using TInformationMap    = std::unordered_map<std::string, DDatabaseItem*>;
+  static bool sIsFlaged    = false;
+  
+  TInformationMap mInfoMap = {};
 };
 ```
-
-* **최소 namespace 의 범위를 가지는 Global variable 은 `g_` 을 사용한다.**
-* **`const` `constexpr` 의 상수성을 가지는 변수에는 `k_` 을 사용한다. 만약 다른 *prefix* 와 같이 써야 한다면, 두번째 문자로 쓴다**.
-  * 만일 `static` 과 `const` `constexpr` 상수성이 같이 올 경우에는 `k_` 만을 덧붙인다.
-
-**Good**
-
-``` c++
-namespace ns {
-static constexpr bool gk_flag = false;
-static const bool 
-static uint32_t g_value = 30;
-} // ns
-
-class Class final {
-private:
-  const int32_t   mk_sign_value = 0b00001111; 
-  static uint32_t ms_static_variable = 0xFF;
-  Class* m_ptr = nullptr;
-}
-```
-
-> 
->
-> ~ [Naming convention for class member variables](https://www.reddit.com/r/cpp/comments/4fxvqi/naming_convention_for_class_member_variables/)
 
 ### N. Function Names
 
@@ -884,39 +857,43 @@ private:
 ``` c++
 AddTableEntry();
 DeleteUrl();
-OpenFile(k_file_path);
+OpenFile(kFilePath);
 ```
 
 * **멤버 함수의 Getter / Setter 은 `Get` `Set` 전부 붙여서 쓴다.**
   * 현재 스타일에서는 타입 이름이 대문자 Camelcase 을 따르기 때문에, 혼동을 주지 않기 위해서 붙인다.
 
 ``` c++
-class Information final {
+class Information final 
+{
 public:
-  std::string GetName() const noexcept { return m_name; }
-  void SetName(const std::string& name) { m_name = name; }
-  void SetName(const char* name) { m_name = name; }
+  [[nodiscard]] std::string GetName() const noexcept { return this->mName; }
+  void SetName(const std::string& name) noexcept { this->mName = name; }
+  void SetName(const char* name) noexcept { this->mName = name; }
 private:
-  std::string m_name = "";
+  std::string mName = "";
 }
 ```
 
+* `private` 혹은 `protected` 인 멤버 함수의 이름은 `p` 을 `prefix` 로 붙인다.
+* `friend` 된 클래스 혹은 함수에서 호출할 가능성이 있는 함수의 이름은 `f` 을 붙인다.
+  * 만약 `private` 이고 `friend` 타입에서 호출할 가능성이 있는 함수의 prefix 는 `pf` 가 된다.
+
 ### N. Namespace Names
 
-* **네임스페이스는 소문자이거나 `_` 을 써야 한다.**
-* **가장 최상위 네임스페이스는 항상 프로젝트의 이름이어야 한다.**
-* **네임스페이스의 이름 역시 축약되지 않고 명확해야 한다.**
-* **`std` 네임스페이스를 범위로 하는 사용자 정의 타입 및 중첩 네임스페이스를 만들지 말라.**
+* 네임스페이스 이름은 10 글자 이내의 소문자로만 구성한다.
+* 가장 최상위 네임스페이스는 항상 프로젝트의 이름 혹은 프로젝트의 축약어일 것.
+* `std` 네임스페이스를 범위로 하는 사용자 정의 타입 및 중첩 네임스페이스를 만들지 말 것.
 
 ### N. Enumerator Names
 
-* **열거형 요소들의 이름은 대문자를 시작으로 하는 Camel case 로 작성한다.**
-  * 이전까지는 대문자 및 `_` 만으로 이름을 작성했지만, 매크로의 이름 표기법과 충돌이 되고 매크로가 우선 순위를 가지기 때문에 충돌이 일어날 수 있었다.
+* 열거형 요소들의 이름은 대문자를 시작으로 하는 Camel case 로 작성한다.
 
 **Good**
 
 ``` c++
-enum class EUrlTableErrors {
+enum class EUrlTableErrors 
+{
   Ok = 0,
   ErrorOutOfMemory,
   ErrorMalformedInput
@@ -926,7 +903,8 @@ enum class EUrlTableErrors {
 ~~**Bad**~~
 
 ``` c++
-enum class EUrlTableErrorsNotProper {
+enum class EUrlTableErrorsNotProper 
+{
   OK = 0,
   ERROR_OUT_OF_MEMORY,
   ERROR_MALFORMED_INPUT
@@ -935,20 +913,17 @@ enum class EUrlTableErrorsNotProper {
 
 ### N. Macro Names
 
-* **되도록이면 매크로를 정의하지 마라.**
-  * `constexpr ` 혹은 `inline` 의 함수를 정의해서 쓰는 것을 선호하라.
-* **만약에 정의를 하지 않으면 안되는 상황일 때는, 대문자 및 `_` 만으로 이루어진 이름으로 작성한다.**
+* **대문자 및 `_` 만으로 이루어진 이름으로 작성한다.**
+  * 매크로임을 확실하게 하기 위해 `M_` 과 같은 prefix 을 쓰는 것도 권장함.
 
 ``` c++
-#define ROUND(x) ...
-#define PI_ROUNED 3.0
+#define M_ROUND(x) ...
+#define M_PI_ROUNED 3.0
 ```
-
-
 
 ## Other C++ Features
 
-### T. 고정 사이즈 정수형 타입 (`cstdint`)
+### T. 고정 사이즈 정수형 타입 (`cstdint`) && `size_t`
 
 > 64-bit data models
 > https://en.wikipedia.org/wiki/64-bit_computing
@@ -975,19 +950,14 @@ enum class EUrlTableErrorsNotProper {
     다만 플랫폼 및 컴파일러에 따라 제공하는 최대 변수 타입이 달라질 수도 있다.
   * `for` `while` 에서 탐색을 위한 임시 변수를 사용할 때는 고정형 타입을 쓰지 않는다.
 * `long` 타입의 경우에는 x64 모델 시스템에서의 윈도우에서의 사이즈, 그 외 유닉스 및 리눅스 계열의 사이즈 값이 다르기 때문에 사용을 금한다.
+* 고정형 타입에 별칭을 적용해 사용할 것.
 
-### T. `size_t`
+* 인덱스 값 저장 혹은 인덱스 참조를 위한 일부 계산식을 제외하고는 **`size_t` 를 일반 변수형과 같이 섞어 사용하지 않는다.**
+  * 왠만해서는 사용하지 않으려고 하자.
 
-* **인덱스 값 저장 혹은 인덱스 참조를 위한 일부 계산식을 제외하고는 `size_t` 를 일반 변수형과 같이 섞어 사용하지 않는다.**
+### T. Operator overloading
 
-### T. 레퍼런스 인자
-
-* **레퍼런스로 전달되는 모든 인자는 `const` 로 수식되어야 한다.**
-* **함수가 변수를 변경할 필요가 있는 경우에는 포인터를 사용해야 한다.**
-
-``` c++
-void Foo(const std::string& in, string* out);
-```
+> Under construction...
 
 ### T. Rvalue References
 
@@ -1006,25 +976,6 @@ void Foo(const std::string& in, string* out);
 > friend는 클래스의 캡슐화의 경계를 확장하지만 깨뜨리지는 않는다. 이것은 다른 클래스 하나를 위해 멤버를 public으로 두는 것보다 낫다. 그러나 대부분의 클래스는 public 멤버들을 통해서만 다른 클래스들과 상호작용하여야 한다.
 >
 > ~  Google C++ Style guide (한글) [link](http://jongwook.kim/google-styleguide/trunk/cppguide.xml)
-
-### T. Exceptions
-
-* **C++ 예외를 사용하지 않는다.**
-
-> 더 일반적으로, 예외는 코드를 보며 프로그램의 흐름을 파악하기 어렵게 하고 함수들이 어디서 제대로 리턴할 지 기대하기 어렵게 만들며 이것은 유지 보수와 디버깅을 어렵게 한다. 이러한 불편은 어디서 어떻게 예외를 사용할지 규칙을 정하는 것으로 줄일 수 있지만 개발자가 그것을 알고 이해해야 한다는 비용도 크다. 
->
-> 예외를 사용하는 것은 만들어진 각 바이너리(binary)에 데이터를 추가하고 컴파일 시간과 주소 공간의 부담을 증가시킨다. 
->
-> 더 일반적으로, 예외는 코드를 보며 프로그램의 흐름을 파악하기 어렵게 하고 함수들이 어디서 제대로 리턴할 지 기대하기 어렵게 만들며 이것은 유지 보수와 디버깅을 어렵게 한다. 이러한 불편은 어디서 어떻게 예외를 사용할지 규칙을 정하는 것으로 줄일 수 있지만 개발자가 그것을 알고 이해해야 한다는 비용도 크다. 
->
-> ~  Google C++ Style guide (한글) [link](http://jongwook.kim/google-styleguide/trunk/cppguide.xml)
-
-* **따라서, STL 컨테이너 대다수 `std::vector` `std::list` `std::map` 등 은 사용할 수 없다.**
-
-  * exception 을 사용하지 않는 STL 방언을 사용한다. 
-  * EASTL 을 사용하는 것을 추천한다.
-
-  *예외*는 현대 C++ 의 기본 철칙인 
 
 ### T. `noexcept`
 
@@ -1057,7 +1008,8 @@ void Foo(const std::string& in, string* out);
 // From https://akrzemi1.wordpress.com/2014/04/24/noexcept-what-for/
 int Tool::operator=(Tool&& rhs)
 {
-  if (ResourceHandle tmp = getSentinelResource()) {
+  if (ResourceHandle tmp = getSentinelResource(); tmp != nullptr) 
+  {
     dispose(this->resourceHandle);
     this->resourceHandle = rhs.resourceHandle;
     rhs.resourceHandle = tmp;
@@ -1108,7 +1060,6 @@ C 의 유산인 매크로는 해석 범위에 대해 전역 범위를 가진다.
 * **매크로를 사용해서 `inline` 화를 꾀하고자 할 때는 `inline` 함수를 사용한다.**
 * **상수를 이용하고 싶을 때는 `const` 혹은 `constexpr` 변수를 사용한다.**
 * **긴 이름을 줄이려고 한다면, *참조*를 사용한다.**
-* **그 외 등등...**
 
 또한 다음 규칙을 준수한다.
 
@@ -1121,19 +1072,16 @@ C 의 유산인 매크로는 해석 범위에 대해 전역 범위를 가진다.
 
 ``` c++
 /// Helper/assert.h
-
 #ifndef NDEBUG
 
 #define NEU_ASSERT(__MAExpr__, __MAMessage__) \
   ::opgs16::debug::__EnhancedAssert(#__MAExpr__, __MAExpr__, __FILE__, __LINE__, __MAMessage__)
-
 #define NEU_NOT_IMPLEMENTED_ASSERT() \
   ::opgs16::debug::__NotImplementedAssert(__FILE__, __LINE__)
 
 #else
 
 #define NEU_ASSERT(__MAExpr__, __MAMessage__) (void(0));
-
 #define NEU_NOT_IMPLEMENTED_ASSERT() (void(0));
 
 #endif
@@ -1225,39 +1173,9 @@ myObject.Enable(true);
   * -std=c++0x 에서, ARM gcc 6.3.0, clang 4.0.0, x86-64 gcc 4.8.3 에서 검증 완료
   * https://godbolt.org/g/eAAiBh
 
-```assembly
-OnBool():
-        movb    $1, (anonymous namespace)::is_on(%rip)
-        ret
-OnEBool():
-        movb    $1, (anonymous namespace)::is_eon(%rip)
-        ret
-.LC0:
-        .string "plain bool is off"
-.LC1:
-        .string "plain bool is on"
-CheckBool():
-        cmpb    $0, (anonymous namespace)::is_on(%rip)
-        je      .L6
-        movl    $.LC1, %edi
-        jmp     puts
-.L6:
-        movl    $.LC0, %edi
-        jmp     puts
-.LC2:
-        .string "plain enum bool is off"
-.LC3:
-        .string "plain enum bool is on"
-CheckEBool():
-        cmpb    $0, (anonymous namespace)::is_eon(%rip)
-        je      .L9
-        movl    $.LC3, %edi
-        jmp     puts
-```
-
 ### T. Assertion
 
-* **적극 사용한다. 하지만 단언문 (assert) 은 릴리즈 모드에서는 무효화되기 때문에 검증 표현식에 프로그램의 행동을 바꾸는 구문은 쓰지 말아야 한다.**
+* **적극 사용한다. 하지만 단언문 (assert) 은 릴리즈 모드에서는 무효화되기 때문에 검증 표현식에서 프로그램의 행동을 바꾸는 구문은 쓰지 말아야 한다.**
 
 **Good**
 
@@ -1275,99 +1193,20 @@ assert(value == i++)
 
 ### T. 문자열 타입
 
-* **`char` `std::string` 이외의 다른 타입을 사용하지 않는다.**
-* **만약 특정 라이브러리에서 다른 문자열 타입을 원할 경우에는 그 상황일 때만 사용한다.**
-* **`char16_t` `char32_t` 및 `wchar_t` 을 사용하지 않는다.**
-* **왠만해서는 `std::string` 을 쓴다.**
+* `char` `std::string` 이외의 다른 타입을 사용하지 않는다.
+* 만약 특정 라이브러리에서 다른 문자열 타입을 원할 경우에는 그 상황일 때만 사용한다.
+* `char16_t` `char32_t` 및 `wchar_t` 을 사용하지 않는다.
+* 왠만해서는 `std::string` 을 쓴다.
 
 ## Et cetera
 
 ### E. 64-bit Portability
 
-* **해당 프로젝트의 코드는 반드시 64-bit 와 32-bit 호환성을 만족시켜야 한다.**
-  * 출력, 비교 및 구조체 정렬에 대해서 조심히 다뤄야 한다.
-
-### E. Boost
-
-### E. EASTL
-
-### E. Do not use singleton
-
-* **싱글턴은 사용하지도 않고, 쳐다보지도 않는다.**
-  * C++ 는 C# 이 아니다!
-  * **싱글턴은 게으른 초기화 (lazy initialization) 을 사용하고 있으며 제어할 수 없다.**
-  * C++11 이후에는 지역 범위 정적 객체에 대한 참조 반환이 스레드에 안전하게 변경이 되었지만, **싱글턴 클래스 자체의 스레드 안전 여부와는 별개의 사항이다.** C++11 이전에는 [double-checked locking](https://en.wikipedia.org/wiki/Double-checked_locking) 과 같은 특수한 패턴을 사용했지만 매우 번거롭고 뮤텍스를 사용하기 때문에 성능을 떨어뜨린다.
-
-~~**Bad**~~
-
-``` c++
-// Fxxking do not use singleton!!!!
-class MFontManager final {
-public:
-	/*! Return single static instance. This must be called in initiation time once. */
-	static MFontManager& Instance() {
-		static MFontManager instance{};
-		return instance;
-	}
-}
-```
-
-* **관리 객체에 대해서는 정적 클래스를 사용한 싱글턴 대신, 네임스페이스를 사용한다.**
-  * 네임스페이스로 바깥에 보일 함수만을 만들고, 나머지는 `.cc` 파일에 구현한다.
-  * 관리할 데이터는 `.cc` 파일에서 **무명 네임스페이스**를 사용해서 변수를 선언하고, 정적 링킹을 한다.
-  * 임의 시점에서 초기화가 될 지 모르는 일반 정적 클래스, 혹은 싱글턴과는 다르게 스코프가 어플리케이션의 시작부터 끝까지로 보장이 된다.
-* **처음부터 끝까지 특정 메모리 영역을 사용하기 때문에, 필수 데이터만 선언한다.**
-* **Initiate() 함수가 필요할 경우, 반드시 단언문 (assert) 을 사용해서 한 번만 초기화할 수 있도록 해야한다.**
-  * 런타임에 인스턴스 개수를 확인 할 수 밖에 없는 단점이 존재한다.
-
-``` c++
-/// header file
-/// @namespace opgs16::manager::input
-///
-namespace opgs16::manager::input {
-///
-/// @brief
-/// 
-void Initiate(GLFWwindow* window_context);
-///
-/// @brief 
-/// 
-float GetKeyValue(const std::string& key);
- 
-} /// ::opgs16::manager::input
-```
-
-``` c++
-/// source file
-///
-/// This namespace stores variables or 
-/// constexpr variables to be used by functions.
-///
-namespace {
-using opgs16::manager::_internal::BindingKeyInfo;
-using key_map = std::unordered_map<std::string, BindingKeyInfo>;
-constexpr std::string_view input_path{ "_Setting/input.meta"sv };
-
-// Window handle pointer
-GLFWwindow* m_window;
-key_map m_key_inputs;
-} /// unnamed namespace
-
-namespace opgs16::manager::input {
-void Initiate(GLFWwindow* window_context) {
-  NEU_ASSERT(m_initiated == EInitiated::NotInitiated, debug::err_input_duplicated_init);
-  m_initiated = EInitiated::Initiated;
-  m_window = window_context;
-  ReadInputFile(input_path.data());
-}
-} /// ::opgs16::manager::input
-```
-
-* **여기서 제시한 방법이 완전한 해답은 아님을 명심한다.**
-  * 더 좋은 방법이 있으면 그걸 써도 된다. (+ 알려주세요...)
+* C++ 프로젝트의 코드는 64-bit 의 호환성을 기준으로 개발되어야 할 것.
 
 ### E. Error checking
 
-* **에러 체킹은 발생 즉시 처리해야만 한다. 따라서 `.IsError()` `.ErrorCheck()` 와 같은 함수로 에러 발생 이후에 뒤늦게 체킹하는 것은 금지한다.**
+* **에러 체킹은 발생 즉시 처리해야만 한다. **
+  **따라서 `.IsError()` `.ErrorCheck()` 이 에러 발생 이후에 임의 시점에서 뒤늦게 핸들링을 하는 것은 금지한다.**
 * 개발은 항상 디버그 모드에서 하며, 실행 중 에러로 인해서 앞으로의 처리에 이상이 올 경우에는 주저없이 **assert 등을 사용해서 동작을 멈춘다.**
 

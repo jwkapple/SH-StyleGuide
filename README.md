@@ -1,6 +1,6 @@
-# studioN Style Guide
+# `StudioN` Style Guide
 
-Personal coding style guide for open-source projects.
+Personal coding style guide for projects.
 
 ### Log
 
@@ -19,5 +19,20 @@ Personal coding style guide for open-source projects.
   >
   > デザインパターンの備忘録（Unity用)
   > https://qiita.com/English_Story/items/1ea0d16763878f382c2c
+
+* `[Kor]CppStyle.md` 
+
+  1. 2018-11-27 AM 12:06 갱신.
+     `In. Preface` 본문 추가
+     `O. C++ Standard Versions` 
+     `O. 경고를 에러같이 취급할 것` 
+     `O. Static Instance (Singleton) 의 사용을 자제할 것.` 
+     `O. RTTI 및 Exception 을 쓰지 말 것.` 본문 갱신.
+
+  2. 2018-11-27 PM 01:26 갱신.
+     `문서 전체` 갱신. 더 이상 적용되지 않는 항목 삭제.
+     `T. Operator overloading` 항목만 추가. 본문 작성을 해야함.
+
+---
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.

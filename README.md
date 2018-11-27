@@ -1,6 +1,6 @@
 # `StudioN` Style Guide
 
-Personal coding style guide for projects.
+Personal coding style guide for projects. <br>個人プロジェクトを作るときに各言語のコーディングスタイルを書いたレポジトリです。<br>개인 프로젝트를 할 때 각 언어에 대한 코딩 컨벤션을 정리해서 문서화한 레퍼지터리입니다.
 
 ### Log
 
@@ -23,8 +23,11 @@ Personal coding style guide for projects.
 * `[Kor]CppStyle.md` 
 
   1. 2018-11-27 AM 12:06 갱신. <br>`In. Preface` 본문 추가 <br>`O. C++ Standard Versions` <br>`O. 경고를 에러같이 취급할 것` <br>`O. Static Instance (Singleton) 의 사용을 자제할 것.` <br>`O. RTTI 및 Exception 을 쓰지 말 것.` 본문 갱신. <br>
-
   2. 2018-11-27 PM 01:26 갱신. <br>`문서 전체` 갱신. 더 이상 적용되지 않는 항목 삭제. <br>`T. Operator overloading` 항목만 추가. 본문 작성을 해야함.
+
+* `[Eng]CppStyle.md`
+
+  1. 2018-11-27 PM 04:09 <br>Create Document. <br>`C. Comments` Chapter complete.
 
 ---
 

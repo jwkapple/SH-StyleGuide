@@ -64,26 +64,18 @@
   * 값 변환을 제대로 하지 않았을 때, 등등에서 경고가 발생할 수 있다.
 * **되도록 표준 컴파일러를 채용해서 모든 경고를 출력할 수 있도록 하라.**
   * 만약 `MSVC` 와 `Visual Studio` 을 사용해서 개발을 할 경우에는 해당 프로젝트의 C++ 로그 메시지 출력을 가장 verbose 하게 출력할 수 있도록 설정하라.
+  * `gcc` `clang` 의 경우 `-Wall` `-Werror` `-Wextra` 의 옵션을 붙여서 모든 경고에 대해 에러로 치환할 수 있다. 그리고 `--verbose` 을 사용해서 출력 로그를 자세하게 표시할 수 있다.
 
 ### O. Static Instance (Singleton) 의 사용을 자제할 것.
 
-> Static constructors and destructors (e.g. global variables whose types have a constructor or destructor) should not be added to the code base, and should be removed wherever possible. Besides well known problems where the order of initialization is undefined between globals in different source files, the entire concept of static constructors is at odds with the common use case of LLVM as a library linked into a larger application.
->
-> ~ LLVM Coding Standards
-
 * `Constructor` 와 `Desctructor` 을 가지는 정적 인스턴스를 사용할 때는 항상 주의하며, 다른 방법이 있으면 다른 방법을 택하라.
 * 정적 인스턴스의 참조나 포인터를 가지는 변수를 클래스 밖이나 함수 밖에서 설정할 때는 반드시 헤더 파일에서 `static` 을 붙여 변수를 설정하도록 한다.
-* 정적 인스턴스들을 초기화 할 때는 정적 인스턴스들 끼리 프로그램의 시작과 끝에서 한꺼번에 초기화를 행할 수 있도록 한다.
+* 정적 인스턴스들을 초기화 할 때는 프로그램의 시작과 끝에서 정적 인스턴스들끼리 한꺼번에 초기화를 행할 수 있도록 한다.
 * 정적 인스턴스들의 `Constructor` 와 `Destructor` 안에서는 다른 정적 인스턴스들에 종속성이 없는 코드를 설정한다.
   * 부득이 한 경우에는 `assertion` 등을 사용해서 해당 정적 인스턴스가 초기화가 되었는가를 확인하는 코드를 맨 앞에 넣어 검증한다.
+* 정적 인스턴스는 마이어스 싱글턴 혹은 `C++11` 에서 보증이 된 매직 스태틱 패턴을 사용해서 구현해야 한다.
 
 ### O. RTTI 및 Exception 을 쓰지 말 것.
-
-> https://msdn.microsoft.com/en-us/library/hh279678.aspx
-
-> Querying the type of an object at run-time frequently means a design problem. Needing to know the type of an object at runtime is often an indication that the design of your class hierarchy is flawed.
->
-> Undisciplined use of RTTI makes code hard to maintain. It can lead to type-based decision trees or switch statements scattered throughout the code, all of which must be examined when making further changes.
 
 * **`RTTI` 을 금지한다.** RTTI (Run-Time Type Information) 은 런타임에 타입 정보를 조회하는 C++ 의 기능이다. 하지만 RTTI 은 C++ 의 기본 원칙인 `Zero Overhead Principle` 에 전면적으로 위배된다. 즉 런타임 코스트가 상당량 든다.
   * 뿐만 아니라 `typeid()` 을 사용해서 가져오는 `RTTI` 정보의 참조는 같은 타입일지라도 다를 수가 있다.
@@ -98,6 +90,7 @@
     * `Destructor` 의 경우에는 **반드시 성공** 해야하기 때문에 검증 코드를 따로 만들지 않아도 된다.
 * 에러 핸들링에 관해서 추천할 만한 라이브러리는 `boost::outcome` 이 있다. (실 사용은 아직 X)
   https://ned14.github.io/outcome/
+* 기존 `STL` 의 경우에는 위 사항을 예외로 한다. 왜냐하면 `STL` 은 `try` `catch` 와 같은 예외 핸들링을 적극적으로 쓰기 때문이다. 혹여나 싶으면 옵션으로 익셉션을 사용하지 않도록 해서 `STL` 을 쓰게 할 수도 있다.
 
 ## Comments
 
@@ -164,7 +157,7 @@ if (it->second) {
   * **함수 바디 안에서 주석을 작성할 때는 `//` 을 쓴다. 이 경우 양 끝에 주석을 한 줄씩 추가할 필요는 없다.**
   * *doxygen* 의 문서를 작성할 경우, `///` 을 쓴다. 이 때 양 끝에 한 줄씩 주석을 더 쓴다.
   * 네임스페이스의 끝, 헤더 파일 코멘트의 경우 `///` 을 쓴다.
-  * `//!` 계열의 주석을 써도 좋다.
+  * 코드를 구간 별로 분리할 경우 `//!` 계열의 주석을 써도 좋다.
 
 **Good**
 
@@ -201,14 +194,7 @@ or
  */
 ```
 
-###### 예외
-
-주석을 작성할 때, 다음과 같은 예외가 있다.
-
-1. C 코드를 쓸 때는 `/* */` 의 C 주석 스타일을 쓴다.
-2. C 스타일의 주석만 인식하는 툴을 사용할 때는 C 스타일의 주석 스타일을 쓴다.
-
-### C. Comments for Non-obvious objects
+### C. Comments for Non-Obvious Objects
 
 > Every non-obvious class declaration should have an accompanying comment that describes what it is for and how it should be used.
 >
@@ -223,7 +209,7 @@ or
 
 ### C. File Header
 
-* Include Guard 적용 시, `#pragma once` 을 사용하지 않는다.
+* Include Guard 을 쓸 때 `#pragma once` 을 사용하지 않는다.
 
 * **프로젝트에 적용되고 있는 라이선스가 있을 경우에는, 원문 혹은 요약문을 맨 위에 붙인다.**
 
@@ -240,9 +226,6 @@ or
 /// If you want to read full statements, read LICENSE file.
 ///
 ```
-
-* **만약 `.h` 파일이 여러가지 추상화를 가지고 있으면, 해당 파일의 전반적인 내용에 대해서 1, 2 줄로 쓰는 것을 추천한다.**
-  * 구체적인 문서는 해당 추상화 클래스 및 기능의 앞 부분에서 코멘트를 쓴다.
 
 ### C. Implementation Comments
 

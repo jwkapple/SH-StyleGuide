@@ -1,17 +1,19 @@
 # `StudioN` C++ Coding Style
 
-> 2018-05-21 Under construction.
->
-> 2018-11-27 AM 12:06 갱신. 
-> `In. Preface` 본문 추가
-> `O. C++ Standard Versions` 
-> `O. 경고를 에러같이 취급할 것` 
-> `O. Static Instance (Singleton) 의 사용을 자제할 것.` 
-> `O. RTTI 및 Exception 을 쓰지 말 것.` 본문 갱신.
->
-> 2018-11-27 PM 01:26 갱신.
-> `문서 전체` 갱신. 더 이상 적용되지 않는 항목 삭제.
-> `T. Operator overloading` 항목만 추가. 본문 작성을 해야함.
+2018-05-21 Under construction.<br>
+
+2018-11-27 AM 12:06 갱신. <br>
+`In. Preface` 본문 추가<br>
+`O. C++ Standard Versions` <br>
+`O. 경고를 에러같이 취급할 것` <br>
+`O. Static Instance (Singleton) 의 사용을 자제할 것.` <br>
+`O. RTTI 및 Exception 을 쓰지 말 것.` 본문 갱신.<br>
+
+2018-11-27 PM 01:26 갱신.<br>
+`문서 전체` 갱신. 더 이상 적용되지 않는 항목 삭제.<br>
+`T. Operator overloading` 항목만 추가. 본문 작성을 해야함.<br>
+
+2019-07-18 PM 03:58 갱신.
 
 ## Introduction
 
@@ -48,32 +50,30 @@
 
 ### O. C++ Standard Versions
 
-* **`2018-11-25` 기준, C++17 을 사용한다.**
+* **`2019-07-10` 기준, C++17 을 사용한다.**
   * 다만 `pmr` 그리고 `parallel STL` 은 사용하지 않도록 한다. 
-    왜냐하면 `clang` 과 `gcc` 는 병렬 STL 의 기능들을 `<experimental/xxx>` 로 분류하고 있으며 아직까지 정식으로 편입되지 않은 상황이기 때문이다.
-    (2018-11-25 확인 https://en.cppreference.com/w/cpp/compiler_support)
-* **표준에 기재된 기능 외의 각 컴파일러마다 지원하고 있는 비표준 기능은 되도록 사용하지 않습니다.**
-  * `module`, `_s` method 등 역시 **그냥은** 사용할 수 없습니다.
+* **표준에 기재된 기능 외의 각 컴파일러마다 지원하고 있는 비표준 기능은 되도록 사용하지 않는다.**
+  * `module`, `_s` method 등을 사용하지 않는다. VS 의 `_s` API 체크를 끄고 싶으면 `CRT_SECURE_NO_WARNINGS` 플래그를 적어서 빌드하도록 하자.
   * 만약에 굳이 사용하고자 하는 경우라면 다음과 같이 사용하자.
     1. 비표준 기능을 매크로로 감싼다.
     2. 매크로로 감싸는 동시에 각 C++ 컴파일러에 대한 전처리 매크로 플래그를 사용해 분기를 시킨다.
 
 ### O. 경고를 에러같이 취급할 것.
 
-* **컴파일 도중에 발생하는 경고는 해당 코드에 대해서 잠재적인 에러 요소를 가지고 있다는 증거이다.**
+* **컴파일 도중에 발생하는 경고는 해당 코드가 잠재적인 에러 요소를 가지고 있다는 증거이다.**
   * 값 변환을 제대로 하지 않았을 때, 등등에서 경고가 발생할 수 있다.
-* **되도록 표준 컴파일러를 채용해서 모든 경고를 출력할 수 있도록 하라.**
+* **되도록 컴파일러에게 플래그를 설정해 모든 경고를 출력할 수 있도록 하라.**
   * 만약 `MSVC` 와 `Visual Studio` 을 사용해서 개발을 할 경우에는 해당 프로젝트의 C++ 로그 메시지 출력을 가장 verbose 하게 출력할 수 있도록 설정하라.
   * `gcc` `clang` 의 경우 `-Wall` `-Werror` `-Wextra` 의 옵션을 붙여서 모든 경고에 대해 에러로 치환할 수 있다. 그리고 `--verbose` 을 사용해서 출력 로그를 자세하게 표시할 수 있다.
 
-### O. Static Instance (Singleton) 의 사용을 자제할 것.
+### O. Static Instance (Singleton) 의 사용은 특별히 필요한 곳에서만 할 것.
 
 * `Constructor` 와 `Desctructor` 을 가지는 정적 인스턴스를 사용할 때는 항상 주의하며, 다른 방법이 있으면 다른 방법을 택하라.
 * 정적 인스턴스의 참조나 포인터를 가지는 변수를 클래스 밖이나 함수 밖에서 설정할 때는 반드시 헤더 파일에서 `static` 을 붙여 변수를 설정하도록 한다.
 * 정적 인스턴스들을 초기화 할 때는 프로그램의 시작과 끝에서 정적 인스턴스들끼리 한꺼번에 초기화를 행할 수 있도록 한다.
 * 정적 인스턴스들의 `Constructor` 와 `Destructor` 안에서는 다른 정적 인스턴스들에 종속성이 없는 코드를 설정한다.
   * 부득이 한 경우에는 `assertion` 등을 사용해서 해당 정적 인스턴스가 초기화가 되었는가를 확인하는 코드를 맨 앞에 넣어 검증한다.
-* 정적 인스턴스는 마이어스 싱글턴 혹은 `C++11` 에서 보증이 된 매직 스태틱 패턴을 사용해서 구현해야 한다.
+* 정적 인스턴스는 마이어스 싱글턴 혹은 `C++11` 에서 보증이 된 매직 스태틱 패턴을 사용해서 구현해야 한다. 혹은 `dy::expr` 의 `ISingleton<>` 을 상속해서 사용할 것.
 
 ### O. RTTI 및 Exception 을 쓰지 말 것.
 
@@ -90,6 +90,7 @@
     * `Destructor` 의 경우에는 **반드시 성공** 해야하기 때문에 검증 코드를 따로 만들지 않아도 된다.
 * 에러 핸들링에 관해서 추천할 만한 라이브러리는 `boost::outcome` 이 있다. (실 사용은 아직 X)
   https://ned14.github.io/outcome/
+  * 혹은 `boost::outcome` 의 Standalone 버전인 `Outcome` library 을 사용하자.
 * 기존 `STL` 의 경우에는 위 사항을 예외로 한다. 왜냐하면 `STL` 은 `try` `catch` 와 같은 예외 핸들링을 적극적으로 쓰기 때문이다. 혹여나 싶으면 옵션으로 익셉션을 사용하지 않도록 해서 `STL` 을 쓰게 할 수도 있다.
 
 ## Comments
@@ -155,14 +156,13 @@ if (it->second) {
 
 * `//` 혹은 `/* */` 신택스 중 둘 중 하나를 써도 상관은 없으나, **가급적이면 `//` 을 쓴다.**
   * **함수 바디 안에서 주석을 작성할 때는 `//` 을 쓴다. 이 경우 양 끝에 주석을 한 줄씩 추가할 필요는 없다.**
-  * *doxygen* 의 문서를 작성할 경우, `///` 을 쓴다. 이 때 양 끝에 한 줄씩 주석을 더 쓴다.
+  * *doxygen* 의 문서를 작성할 경우, `///` 을 쓴다. ~~이 때 양 끝에 한 줄씩 주석을 더 쓴다.~~
   * 네임스페이스의 끝, 헤더 파일 코멘트의 경우 `///` 을 쓴다.
   * 코드를 구간 별로 분리할 경우 `//!` 계열의 주석을 써도 좋다.
 
 **Good**
 
 ``` c++
-///
 /// @brief 
 /// Let each key value where key status is KeyInputStatus::RELEASED 
 /// falling down into dead_zone and change status into KeyInputStatus::NEUTRAL 
@@ -172,20 +172,12 @@ if (it->second) {
 /// multiply it with gravity and fall it down to 0 (neutral value).
 ///
 /// @param[in] key_info Key information to apply.
-///
 void ProceedGravity(opgs16::manager::_internal::BindingKeyInfo& key_info)
 ```
 
 **Bad**
 
 ``` c++
-/// @brief 
-/// Let each key value where key status is KeyInputStatus::RELEASED 
-/// falling down into dead_zone and change status into KeyInputStatus::NEUTRAL 
-/// along with neutral_gravity.
-
-or
-
 /** 
  * @brief 
  * Let each key value where key status is KeyInputStatus::RELEASED 
@@ -205,7 +197,7 @@ or
 > ~ Class overviews from LLVM Coding Standards
 
 * **Non-obvious 한 Class 및 Method 는 해당 객체의 역할, 동작 방법에 대해서 `doxygen` 으로 설명해야 한다**
-  * *method* 의 경우에는 해당 함수의 전반적인 동작에 대해서 설명한다. `.h` 파일의 선언 부분에서 전반적인 설명을 하며 구현에서 까다로운 부분, 혹은 테크닉을 쓴 경우에는 `.cc` 에서 별도로 설명한다.
+  * *method* 의 경우에는 해당 함수의 전반적인 동작에 대해서 설명한다. `.h` 파일의 선언 부분에서 전반적인 설명을 하며 구현에서 까다로운 부분, 혹은 테크닉을 쓴 경우에는 함수 로직 안에서 별도로 설명한다.
 
 ### C. File Header
 
@@ -220,11 +212,9 @@ or
 **Good**
 
 ``` c++
-///
 /// @license BSD 2-Clause License
 /// Copyright (c) 2018, Jongmin Yun(Neu.), All rights reserved.
 /// If you want to read full statements, read LICENSE file.
-///
 ```
 
 ### C. Implementation Comments
@@ -281,40 +271,32 @@ if (iter != v.end()) {
   * 현재 거의 모든 개발 환경은 해상도가 `1920x1080` 이기 때문에 최대 120 컬럼을 지원한다고 생각함.  
 * **코드의 모든 줄의 텍스트 수는 되도록 `100` 컬럼 안에서 작성하는 것이 바람직하다.**
 
-* 주석에 URL 등이 포함될 경우에는 해당 URL 이 들어간 줄에 한해 120 글자 이상을 허용한다.
+* 주석에 URL 등이 포함될 경우에는 해당 URL 이 들어간 줄은 해당 제한을 받지 않는다.
 
 ### F. Must use `spaces` intead of tab
 
 * **Indent 는 오직 Space 만 사용하며, 2 space 을 사용한다.**
   * `tab` 키를 누를 때, 2 space 을 띄우게끔 설정하는 것도 좋다.
-  * 컬럼의 제약을 맞추기 위해 ~~4 space~~ 대신 2 space 을 사용한다.
+  * 컬럼의 제약을 맞추기 위해 2 space 을 사용한다.
 * 코드 수정 도중에 스타일을 따르지 않는 코드를 수정할 때에는 전체 소스 파일을 반영하지 않도록 해야하며 오직 수정하고자 하는 부분의 최소 단위만 수정한다.
-  * it makes for incredible diffs that are absolutely worthless.
 
 
 ### F. Function Declaration and Definition
 
-* **Return type 은 함수 시그니쳐의 같은 줄에 오게 함이 바람직하다.**
-  * 만약 속성을 포함한 Return type 이 길 경우에는, 함수 이름과 인자를 적는 줄의 윗줄에 적는다.
-* Return type 을 반환한 경우에는 `[[nodiscard]]` 을 **반드시 적어야 한다.**
+* **반환 타입은 함수 시그니쳐의 같은 줄에 오게 함이 바람직하다.**
+  * 만약 속성을 포함한 반환 타입이 길 경우에는, 함수 이름과 인자를 적는 줄의 윗줄에 적는다.
+* 반환 타입을 반환한 경우에는 `[[nodiscard]]`을 **적는 것이 추천한다.**
   * `[[nodiscard]]` 는 C++17 에서 추가된 속성으로 함수에서 반환된 객체를 반드시 받아서 처리해야 한다고 컴파일러에게 알린다. 만약 `[[nodiscard]]` 가 적용된 함수에서 반환된 객체를 바깥에서 처리하지 않을 경우에는 컴파일 에러가 발생한다.
     * 이를 통해 잠재적인 버그가 일어날 수 있는 가능성을 줄여준다.
+    * 모든 함수가 아니라 `Has~` 계열 혹은 `Is~` 계열의 함수의 리턴 타입 (`bool`) 에 해당 속성을 적는 것을 추천한다.
 * **인자 (parameter) 리스트는 함수 시그니쳐의 같은 줄에 오도록 한다. **
   **만약 그러지 못할 경우에는 다음 줄에 오게 한다.**
-  * 길어서 정렬 조차 못할 경우에는, 모든 인자를 4 indent 을 사용해서 정렬하게 할 수 있다.
+  * 길어서 정렬 조차 못할 경우에는, 모든 인자를 4 space 을 사용해서 정렬하게 할 수 있다.
 
 **Good**
 
 ``` c++
 ReturnType ClassName::FunctionName(Type par1, Type par2)
-{
-  DoSomething();
-}
-```
-
-``` c++
-ReturnType ClassName::LongLongFunctionName(Type par1, Type par2, 
-                                           Type par3)
 {
   DoSomething();
 }
@@ -331,16 +313,16 @@ ReturnType ClassName::SoMuchLongLongFunctionName(
 ```
 
 * 인자 이름은 정확한 역할 및 의도를 가져야 한다.
-* 함수 정의에서 쓰이지 않는 인자는 **정의에서 생략될 수 있다**.
+* 함수 정의에서 쓰이지 않는 인자의 이름은 **정의에서 생략될 수 있다**. `[[maybe_unused]]` 는 가급적 사용하지 않는다.
 * `()` 괄호의 여는 괄호는 항상 함수 이름 옆에 와야하며, 띄어쓰기를 금한다.
 * 소스 파일의 해석 단위 안에서만 쓰이는 함수를 선언하거나 정의할 경우에는 **반드시 무명 네임스페이스 안**에서 정의한다.
 * 함수로 전달되는 모든 인자들은 값이거나 레퍼런스여야 한다. `*` 의 사용은 권장하지 않는다. 이는 인자로 넘겨준 레퍼런스가 변경이 될 때에도 변함없다.
   - 불필요한 null check 을 없애기 위해서.
   - 레퍼런스로 전달되는 인자 타입은 `const` 로 수식하는 것을 권장한다.
-* 매크로를 사용해서 `_MIN_` `_MINOUT_` `_MOUT_` 과 같이 인자의 용도를 설정해 두는 것도 바람직할 것이다.
+* ~~매크로를 사용해서 `_MIN_` `_MINOUT_` `_MOUT_` 과 같이 인자의 용도를 설정해 두는 것도 바람직할 것이다.~~<br>매크로를 사용해서 인자의 용도를 결정하는 것보다, `o` `i` `io` 와 같은 전치자를 변수명으로 지어서 사용하게 한다. 만약 해당 함수의 인자로 넘겨주는 값들이 변하지 않는다면, 전치자를 쓰지 않아도 된다.
 
 ``` c++
-void Foo(_MIN_ const std::string& in, _MINOUT_ std::string& out);
+void Foo(const std::string& iString, std::string& oString);
 ```
 
 ### F. Lambda Expression
@@ -375,8 +357,6 @@ auto y = [&r = x, x = x + 1]() -> int
 
 ``` c++
 EFlag retVal = DoSomething(argument1, argument2, argument3);
-EFlag retVal = DoSomething(argument1, argument2,
-                            argument3);
 EFlag retVal = DoSomething(
     argument1,
     argument2,
@@ -385,8 +365,10 @@ EFlag retVal = DoSomething(
 ```
 
 ``` c++
-if (...) {
-  if (...) {
+if (...) 
+{
+  if (...) 
+  {
     // 4 indents
   	DoSomething(
         argument1, argument2,
@@ -410,7 +392,7 @@ EDoFlag result  = DoSomething(myHeuristic, x, y, z);
 ``` c++
 class FClass final
 {
-    // LIKE THIS
+  // LIKE THIS
 };
 ```
 
@@ -474,7 +456,8 @@ if (x == EEnum::Foo) return new Foo();
 else                 return new Nop();
 if (x == EEnum::Foo) { return new Foo(); } else { return new Nop(); }
 if (x == EEnum::Foo) return new Foo();
-else {
+else 
+{
   ...
 }
 ```
@@ -482,7 +465,7 @@ else {
 * **에러 출력 혹은 즉각 return 구문이 있는 절을 if 로 분기를 나눠서 쓰고자 할 때는, `then` 구문에 에러 혹은 처리 후 리턴 (early return) 을 쓸 수 있도록 한다.**
 
 ``` c++
-[[nodiscard]] float GetKeyValue(const std::string& key) 
+float GetKeyValue(const std::string& key) 
 {
   NEU_ASSERT(m_initiated == EInitiated::Initiated, debug::err_input_not_initiated);
 
@@ -595,42 +578,19 @@ namespace nm_a::nm_b::nm_c
 
 ### H. File type specifier
 
-|           | 확장자 |
-| :-------- | :----- |
-| 헤더 파일 | `.h`   |
-| 소스 파일 | `.cc`  |
+|             | 확장자 |
+| :---------- | :----- |
+| 헤더 파일   | `.hpp` |
+| 소스 파일   | `.cc`  |
+| 인라인 파일 | `.inl` |
 
 ### H. Define(Include) Guard
 
 모든 헤더 파일들은 *해석 단위* 에서 여러 번 재 선언되는 것을 막고, 컴파일 크기를 줄이기 위해 한 번만 포함될 수 있도록 해야한다.
 
-*  **#ifndef, #define, #endif 의 Define guard 을 쓴다.**
+*  **#pragma once** 을 쓴다.
 
-*Define Guard* 을 설정할 때, `#ifndef` `#define` `#endif` 을 사용해서 설정한다.
-*Guard* 의 이름은 해당 프로젝트의 이름 + 해당 프로젝트로부터의 경로 이름이 된다. 다만 `Include` 혹은 `Source` 와 같은 대분류 디렉터리는 쓰지 않는다.
-
-**Good**
-
-``` c++
-// Path is ${ProjectDir}/Include/Module/owner.h
-#ifndef PROJECT_NAME_INCLUDE_MODULE_OWNER_H
-#define PROJECT_NAME_INCLUDE_MODULE_OWNER_H
-
-#endif // PROJECT_NAME_MODULE_OWNER_H
-```
-
-~~**Bad**~~
-
-``` c++
-// Path is ${ProjectDir}/Include/Module/owner.h
-#pragma once
-```
-
-`#pragma once` 는 C++ 표준에는 포함되어 있지 않으나, 현재 여러 주요한 컴파일러에서는 지원하고 있는 *Define guard* 이다. 그러나 이것을 쓸 경우, 다른 위치에 존재하는 동일한 이름의 파일이 읽혀지지 않는다. 따라서 만일을 위해 해당 전처리 지시자는 사용을 하지 않는다.
-
-###### 예외
-
-프로젝트에 정식으로 포함되지 않을 임시 파일에는 `#pragma once` 을 쓸 수 있다. 다만 실제 프로젝트에 반영할 때는 위의 사항을 지켜야 한다.
+`#pragma once` 는 `#ifdef ` `#endif ` 의 인클루드 가드를 대체하는 확장 매크로이기 때문에 원래 써서는 안된다. 하지만 현재 자주 쓰이는 컴파일러에서는 지원을 해주고 있기 때문에 해당 매크로를 써서 인클루드 가드를 대체할 수 있다.
 
 ### H. Header Include Order
 
@@ -788,14 +748,19 @@ enum class EUrlTableErrors { ... };
 ```
 
 * **만일의 경우, 해당 프로젝트를 사용하는 제 3 자가 만들어낼 임의 타입과 구분을 지어야 한다면, `C` `E` `D` `M` 등과 같은 prefix 을 타입 이름의 앞에 넣을 수 있다.**
-  * `C, F` : 일반 Class. 정보 외에 동작을 넣을 수 있다.
-  * `D` : POD 혹은 연산 없이 자료 정보만을 가지고 있는 타입.
-  * `E` : 열거형 타입. `enum` `enum class` 둘 다 쓰일 수 있다.
-  * `I` : Interface 타입.
-  * `U` : Union 타입.
-  * `T` : 별칭 타입 혹은 템플릿 타입
-  * `R` : 리플렉션 구현체 타입
-  * `M` : 싱글턴 (static instance) 타입
+
+| 기호 | 설명                                                      |
+| ---- | --------------------------------------------------------- |
+| F    | Class 혹은 복잡한 연산을 지원하는 타입의 경우             |
+| D    | POD 혹은 연산 없이 자료 정보만을 가지고 있는 타입.        |
+| P    | 리턴 값으로 여러 값을 동시에 반환해야 할 때 쓰이는 구조체 |
+| E    | 열거형 타입                                               |
+| I    | 인터페이스 타입                                           |
+| U    | 공용체 타입                                               |
+| T    | 별칭 타입 혹은 템플릿 타입                                |
+| R    | 리플렉션 구현체 타입                                      |
+| M    | 싱글턴 타입                                               |
+
 * **prefix 을 기입 시, 대문자로 기입한다.**
 
 ### N. Variable Names
@@ -808,6 +773,18 @@ enum class EUrlTableErrors { ... };
 * 최소 namespace 의 범위를 가지는 Global variable 은 `g` 을 사용한다.
 * `this->` 의 사용을 지향한다. 
   컬럼 허용량이 120자로 늘었기 때문에 `this->` 을 사용하는 것이 가독성에는 오히려 더 도움을 준다.
+
+| 기호 | 설명                                                         |
+| ---- | ------------------------------------------------------------ |
+| m    | 멤버 타입. 다른 전치자와 같이 쓰일 수 있다.                  |
+| s    | 정적 (Static) 타입.                                          |
+| k    | Constant 타입.                                               |
+| a    | Atomic 혹은 멀티스레드의 락 알고리즘 등에 쓰이는 변수들      |
+| p    | 포인터 타입의 변수                                           |
+| g    | 타입의 멤버 변수가 아닌 글로벌 변수들                        |
+| i    | 함수 API 의 인자가 복합적일 때, input 변수에 쓰이는 전치사   |
+| o    | 함수 API 의 인자가 복합적일 때, output 변수에 쓰이는 전치사  |
+| io   | 함수 API 의 인자가 복합적일 때, 인풋으로 들어가서 값이 바뀌는 경우 |
 
 **Good**
 
@@ -858,13 +835,23 @@ private:
 }
 ```
 
-* `private` 혹은 `protected` 인 멤버 함수의 이름은 `p` 을 `prefix` 로 붙인다.
-* `friend` 된 클래스 혹은 함수에서 호출할 가능성이 있는 함수의 이름은 `f` 을 붙인다.
-  * 만약 `private` 이고 `friend` 타입에서 호출할 가능성이 있는 함수의 prefix 는 `pf` 가 된다.
+* `private` 혹은 `protected` 인 멤버 함수의 이름은 `P` 을 `prefix` 로 붙인다.
+* `friend` 된 클래스 혹은 함수에서 호출할 가능성이 있는 함수의 이름은 `F` 을 붙인다.
+  * 만약 `private` 이고 `friend` 타입에서 호출할 가능성이 있는 함수의 prefix 는 `PF` 가 된다.
+* 어떤 동작이 완료되었는가, 변수의 값이 어떠한가에 대해 `true/false` 을 반환하는 함수는 **`Is` `Has` 를 전치사로 붙여서 함수 이름을 쓴다.**
+
+``` c++
+class DInformation final
+{
+public:
+  [[nodiscard]] bool IsEmpty() const noexcept { /* ... */ };
+  [[nodiscard]] bool HasA() const noexcept { /* ... */ };
+}
+```
 
 ### N. Namespace Names
 
-* 네임스페이스 이름은 10 글자 이내의 소문자로만 구성한다.
+* 네임스페이스 이름은 10 글자 이내의 소문자로만 구성하는 것을 추천한다.
 * 가장 최상위 네임스페이스는 항상 프로젝트의 이름 혹은 프로젝트의 축약어일 것.
 * `std` 네임스페이스를 범위로 하는 사용자 정의 타입 및 중첩 네임스페이스를 만들지 말 것.
 
@@ -897,7 +884,7 @@ enum class EUrlTableErrorsNotProper
 ### N. Macro Names
 
 * **대문자 및 `_` 만으로 이루어진 이름으로 작성한다.**
-  * 매크로임을 확실하게 하기 위해 `M_` 과 같은 prefix 을 쓰는 것도 권장함.
+  * 프로젝트 로컬 매크로임을 확실하게 하기 위해 `DY_` 과 같은 프로젝트 이름을 사용해서 매크로 이름을 쓰자.
 
 ``` c++
 #define M_ROUND(x) ...
@@ -933,10 +920,9 @@ enum class EUrlTableErrorsNotProper
     다만 플랫폼 및 컴파일러에 따라 제공하는 최대 변수 타입이 달라질 수도 있다.
   * `for` `while` 에서 탐색을 위한 임시 변수를 사용할 때는 고정형 타입을 쓰지 않는다.
 * `long` 타입의 경우에는 x64 모델 시스템에서의 윈도우에서의 사이즈, 그 외 유닉스 및 리눅스 계열의 사이즈 값이 다르기 때문에 사용을 금한다.
-* 고정형 타입에 별칭을 적용해 사용할 것.
+* 고정형 타입에 별칭을 적용해 사용할 것. (`dy::math` 의 별칭들을 사용하자)
 
 * 인덱스 값 저장 혹은 인덱스 참조를 위한 일부 계산식을 제외하고는 **`size_t` 를 일반 변수형과 같이 섞어 사용하지 않는다.**
-  * 왠만해서는 사용하지 않으려고 하자.
 
 ### T. Operator overloading
 
